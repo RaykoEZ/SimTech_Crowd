@@ -18,6 +18,10 @@ void APreyBoid::BeginPlay()
 	
 }
 
+void APreyBoid::setMesh()
+{
+}
+
 // Called every frame
 void APreyBoid::Tick(float DeltaTime)
 {

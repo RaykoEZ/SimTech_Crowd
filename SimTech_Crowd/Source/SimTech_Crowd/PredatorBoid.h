@@ -14,11 +14,10 @@ class SIMTECH_CROWD_API APredatorBoid : public ABoid
 public:	
 	// Sets default values for this actor's properties
 	APredatorBoid();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	virtual void setMesh() override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

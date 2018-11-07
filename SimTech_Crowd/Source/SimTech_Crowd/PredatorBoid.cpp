@@ -18,6 +18,10 @@ void APredatorBoid::BeginPlay()
 	
 }
 
+void APredatorBoid::setMesh()
+{
+}
+
 // Called every frame
 void APredatorBoid::Tick(float DeltaTime)
 {

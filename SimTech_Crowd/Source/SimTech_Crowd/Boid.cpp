@@ -18,6 +18,10 @@ void ABoid::BeginPlay()
 	
 }
 
+void ABoid::setMesh()
+{
+}
+
 // Called every frame
 void ABoid::Tick(float DeltaTime)
 {
