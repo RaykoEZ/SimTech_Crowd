@@ -20,13 +20,65 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	/// Mesh for a boid
-	TUniquePtr<UStaticMesh> m_mesh;
-	/// set mesh for a boid
+	UPROPERTY(BlueprintReadWrite)
+	UStaticMeshComponent *m_mesh;
+
+	/// for a = f/m, 1/m pre-calculated
+	float m_invMass = 1.0f;
 	virtual void setMesh();
+
+	virtual void update();
+	
+	/// update neighbourhood
+	void updateNeighbour();
+
+	FVector seek() const;
+	FVector flee() const;
+	FVector pursue() const;
+	FVector wander() const;
+	FVector separate() const;
+	FVector cohesion() const;
+	FVector alignment() const;
+
+
+	/// pointers to boids in fov radius
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ABoid*> m_niegbours;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	
+	/// Orientation of boid
+	UPROPERTY(BlueprintReadWrite)
+	FRotator m_facing;
+	
+	/// position of boid
+	UPROPERTY(BlueprintReadWrite)
+	FVector m_pos;
+	
+	/// current velocity
+	UPROPERTY(BlueprintReadWrite)
+	FVector m_v;
+
+	/// max velocity
+	UPROPERTY(BlueprintReadWrite)
+	FVector m_vMax;
+	
+	/// max force
+	UPROPERTY(BlueprintReadWrite)
+	FVector m_fMax;
+
+	/// set mesh for a boid
+	UPROPERTY(BlueprintReadWrite)
+	float m_mass = 1.0f;
+	
+	/// field of vision of boid, for neighbourhood
+	UPROPERTY(BlueprintReadWrite)
+	float m_fov = 60.0f;
+
+	/// radius of vision field for nieghbourhood
+	UPROPERTY(BlueprintReadWrite)
+	float m_vRad = 1.0f;
+
 	
 };

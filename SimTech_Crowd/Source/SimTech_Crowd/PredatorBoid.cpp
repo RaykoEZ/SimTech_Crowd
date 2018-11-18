@@ -22,6 +22,10 @@ void APredatorBoid::setMesh()
 {
 }
 
+void APredatorBoid::update()
+{
+}
+
 // Called every frame
 void APredatorBoid::Tick(float DeltaTime)
 {
