@@ -13,7 +13,7 @@ ABoid::ABoid()
 	m_mesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("BoidMesh"));
 
 	m_invMass = 1 / m_mass;
-
+	m_type = EBoidType::OTHER;
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +69,11 @@ FVector ABoid::cohesion() const
 }
 
 FVector ABoid::alignment() const
+{
+	return FVector();
+}
+
+FVector ABoid::avoidCollision() const
 {
 	return FVector();
 }

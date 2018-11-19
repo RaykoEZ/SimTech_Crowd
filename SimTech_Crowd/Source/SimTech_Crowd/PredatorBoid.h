@@ -6,6 +6,22 @@
 #include "Boid.h"
 #include "PredatorBoid.generated.h"
 
+
+
+// Wolf Social Hierarchy
+UENUM(BlueprintType)
+enum class EWolfSocial : uint8
+{
+	ALPHA UMETA(DisplayName = "Alpha Male"),
+	HIGHER UMETA(DisplayName = "Higher Ranks"),
+	LOWER UMETA(DisplayName = "Lower Ranks"),
+	OMEGA UMETA(DisplayName = "Lowest Rank"),
+	OTHER UMETA(DisplayName = "Other")
+};
+
+
+
+
 UCLASS()
 class SIMTECH_CROWD_API APredatorBoid : public ABoid
 {
@@ -19,6 +35,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void setMesh() override;
 	virtual void update() override;
+	FVector followLead() const;
 
 public:	
 	// Called every frame

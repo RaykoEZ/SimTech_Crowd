@@ -8,6 +8,17 @@
 #include "Boid.generated.h"
 
 
+
+// Type of boid in scene
+UENUM(BlueprintType)
+enum class EBoidType : uint8
+{
+	PREDATOR UMETA(DisplayName = "Predator"),
+	PREY UMETA(DisplayName = "Prey"),
+	OTHER UMETA(DisplayName = "Other"),
+
+};
+
 UCLASS()
 class SIMTECH_CROWD_API ABoid : public AActor
 {
@@ -39,8 +50,10 @@ protected:
 	FVector separate() const;
 	FVector cohesion() const;
 	FVector alignment() const;
+	FVector avoidCollision() const;
 
-
+	/// type of boid
+	EBoidType m_type;
 	/// pointers to boids in fov radius
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABoid*> m_niegbours;
@@ -80,5 +93,4 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float m_vRad = 1.0f;
 
-	
 };

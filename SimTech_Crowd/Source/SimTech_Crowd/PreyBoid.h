@@ -20,6 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void setMesh() override;
 	virtual void update() override;
+	FVector evade() const;
 
 public:	
 	// Called every frame
