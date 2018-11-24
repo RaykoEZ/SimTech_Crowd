@@ -19,9 +19,7 @@ void APreyBoid::BeginPlay()
 	
 }
 
-void APreyBoid::setMesh()
-{
-}
+
 
 void APreyBoid::update()
 {

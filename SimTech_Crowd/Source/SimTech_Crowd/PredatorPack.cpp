@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BoidPack.h"
+#include "PredatorPack.h"
 
 
 // Sets default values
-ABoidPack::ABoidPack()
+APredatorPack::APredatorPack()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,14 +12,14 @@ ABoidPack::ABoidPack()
 }
 
 // Called when the game starts or when spawned
-void ABoidPack::BeginPlay()
+void APredatorPack::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ABoidPack::Tick(float DeltaTime)
+void APredatorPack::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

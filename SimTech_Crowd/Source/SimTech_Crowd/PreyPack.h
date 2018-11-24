@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BoidPack.generated.h"
+#include "PreyPack.generated.h"
 
 UCLASS()
-class SIMTECH_CROWD_API ABoidPack : public AActor
+class SIMTECH_CROWD_API APreyPack : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABoidPack();
+	APreyPack();
 
 protected:
 	// Called when the game starts or when spawned

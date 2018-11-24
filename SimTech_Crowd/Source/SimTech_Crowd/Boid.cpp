@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Boid.h"
-#include "Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
+#include "Runtime/Engine/Classes/Components/SphereComponent.h"
+
 
 // Sets default values
 ABoid::ABoid()
@@ -25,7 +26,10 @@ ABoid::ABoid()
 	//m_mesh->SetStaticMesh(mesh.Object);
 	//m_mesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	//m_mesh->SetWorldScale3D(FVector(1.0f));
-	
+	m_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Test Boid Mesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Cone.Cone'"));
+	m_mesh->SetStaticMesh(MeshAsset.Object);
+
 }
 
 // Called when the game starts or when spawned
@@ -35,9 +39,7 @@ void ABoid::BeginPlay()
 	
 }
 
-void ABoid::setMesh()
-{
-}
+
 
 void ABoid::update()
 {
@@ -45,29 +47,57 @@ void ABoid::update()
 
 void ABoid::updateNeighbour()
 {
+
+
 }
 
+// Called every frame
+void ABoid::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
 
 //------------------------------------------------------------------------
 
-FVector ABoid::getTarget()
+
+/// Implementations are based on this paper :
+/// Steering Behaviors For Autonomous Characters
+/// by Craig W.Reynolds, presented on GDC1999
+
+void ABoid::getTarget()
 {
-	return FVector();
+	return;
 }
 
+/// Seek a position to steer towards
 FVector ABoid::seek() const
 {
-	return FVector();
+	FVector desiredV = m_pos - m_target;
+	
+	FVector outV = desiredV.GetSafeNormal();
+	
+	outV *= m_vMax;
+	outV -= m_v;
+
+	return outV;
 }
 
 FVector ABoid::flee() const
 {
-	return FVector();
+	/// steer away from the seeking position
+	return -seek();
 }
 
-FVector ABoid::pursue() const
+FVector ABoid::pursue(const FVector &_futureP) const
 {
-	return FVector();
+	FVector desiredV = m_pos - _futureP;
+
+	FVector outV = desiredV.GetSafeNormal();
+
+	outV *= m_vMax;
+	outV -= m_v;
+	return outV;
 }
 
 FVector ABoid::wander() const
@@ -95,10 +125,5 @@ FVector ABoid::avoidCollision() const
 	return FVector();
 }
 
-// Called every frame
-void ABoid::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
-}
 

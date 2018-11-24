@@ -3,24 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Boid.h"
-#include "PreyBoid.generated.h"
+#include "GameFramework/Actor.h"
+#include "PredatorPack.generated.h"
 
 UCLASS()
-class SIMTECH_CROWD_API APreyBoid : public ABoid
+class SIMTECH_CROWD_API APredatorPack : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APreyBoid();
+	APredatorPack();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	virtual void update() override;
-	FVector evade() const;
 
 public:	
 	// Called every frame

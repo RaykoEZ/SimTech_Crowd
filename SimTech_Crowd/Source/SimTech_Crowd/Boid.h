@@ -30,23 +30,17 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	/// Mesh for a boid
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent *m_mesh;
 
-	/// for a = f/m, 1/m pre-calculated
-	float m_invMass = 1.0f;
-	virtual void setMesh();
-
+	/// update per tick
 	virtual void update();
 	
 	/// update neighbourhood
 	void updateNeighbour();
-
-	FVector getTarget();
+	/// get target position to reach on this frame
+	void getTarget();
 	FVector seek() const;
 	FVector flee() const;
-	FVector pursue() const;
+	FVector pursue(const FVector &_futureP) const;
 	FVector wander() const;
 	FVector separate() const;
 	FVector cohesion() const;
@@ -61,7 +55,37 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
+	/// Mesh for a boid
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent *m_mesh;
+
+	/// set and get type of void for builder
+	void setType(const EBoidType &_t) { m_type = _t; }
+	EBoidType getType() const { return m_type; }
+
+	/// for a = f/m, 1/m pre-calculated
+	float m_invMass = 1.0f;
+	/// set mesh for a boid
+	UPROPERTY(EditAnywhere)
+	float m_mass = 1.0f;
+
+	/// field of vision of boid, for neighbourhood
+	UPROPERTY(EditAnywhere)
+	float m_fov = 60.0f;
+
+	/// radius of vision field for nieghbourhood
+	UPROPERTY(EditAnywhere)
+	float m_vRad = 1.0f;
+
+	/// max speed scalr
+	UPROPERTY(EditAnywhere)
+	float m_vMax;
+
+	/// max force
+	UPROPERTY(EditAnywhere)
+	float m_fMax;
+
 	/// Orientation of boid
 	UPROPERTY(BlueprintReadWrite)
 	FRotator m_facing;
@@ -74,27 +98,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
 
-	/// max velocity
-	UPROPERTY(EditAnywhere)
-	FVector m_vMax;
-	
-	/// max force
-	UPROPERTY(EditAnywhere)
-	FVector m_fMax;
-
 	/// target position to move to/focus on
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_target;
-	/// set mesh for a boid
-	UPROPERTY(EditAnywhere)
-	float m_mass = 1.0f;
 	
-	/// field of vision of boid, for neighbourhood
-	UPROPERTY(EditAnywhere)
-	float m_fov = 60.0f;
-
-	/// radius of vision field for nieghbourhood
-	UPROPERTY(EditAnywhere)
-	float m_vRad = 1.0f;
 
 };
