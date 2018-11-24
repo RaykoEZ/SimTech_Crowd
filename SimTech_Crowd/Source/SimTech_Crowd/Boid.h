@@ -31,7 +31,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	/// Mesh for a boid
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent *m_mesh;
 
 	/// for a = f/m, 1/m pre-calculated
@@ -43,6 +43,7 @@ protected:
 	/// update neighbourhood
 	void updateNeighbour();
 
+	FVector getTarget();
 	FVector seek() const;
 	FVector flee() const;
 	FVector pursue() const;
@@ -56,7 +57,7 @@ protected:
 	EBoidType m_type;
 	/// pointers to boids in fov radius
 	UPROPERTY(BlueprintReadOnly)
-	TArray<ABoid*> m_niegbours;
+	TArray<ABoid*> m_neigbours;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -74,23 +75,26 @@ public:
 	FVector m_v;
 
 	/// max velocity
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FVector m_vMax;
 	
 	/// max force
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FVector m_fMax;
 
-	/// set mesh for a boid
+	/// target position to move to/focus on
 	UPROPERTY(BlueprintReadWrite)
+	FVector m_target;
+	/// set mesh for a boid
+	UPROPERTY(EditAnywhere)
 	float m_mass = 1.0f;
 	
 	/// field of vision of boid, for neighbourhood
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	float m_fov = 60.0f;
 
 	/// radius of vision field for nieghbourhood
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	float m_vRad = 1.0f;
 
 };
