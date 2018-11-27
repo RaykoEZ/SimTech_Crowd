@@ -3,6 +3,7 @@
 #include "SimWorldPawn.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 
+
 // Sets default values
 ASimWorldPawn::ASimWorldPawn()
 {
@@ -16,11 +17,14 @@ void ASimWorldPawn::BeginPlay()
 	Super::BeginPlay();
 	if (GetWorld()) 
 	{
-		m_test = GetWorld()->SpawnActor<ABoid>(FVector(10.0f, 10.0f, 0.1f), FRotator(0.0f));
+		m_test = GetWorld()->SpawnActor<ABoid>(FVector(0.0f, 100.0f, 100.0f), FRotator(0.0f));
+		m_test->m_facing = FRotator(1.0f,0.0f,0.0f);
 		m_test->m_target = FVector(20.0f, 10.0f, 0.1f);
+		//m_test->SetActorLocation(FVector(0.0f, 0.0f, 10.0f));
 		m_test->m_pos = m_test->GetActorLocation();
-		m_test->m_vMax = 20.0f;
-		m_test->m_fMax = 20.0f;		
+		m_test->m_v = FVector(0.02f,0.2f,0.2f);
+		m_test->m_vMax = 1.0f;
+		m_test->m_fMax = 1.0f;		
 
 	}
 

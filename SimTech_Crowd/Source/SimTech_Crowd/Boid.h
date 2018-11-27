@@ -36,8 +36,7 @@ protected:
 	
 	/// update neighbourhood
 	void updateNeighbour();
-	/// get target position to reach on this frame
-	void getTarget();
+
 	FVector seek() const;
 	FVector flee() const;
 	FVector pursue(const FVector &_futureP) const;
@@ -68,7 +67,7 @@ public:
 	float m_invMass = 1.0f;
 	/// set mesh for a boid
 	UPROPERTY(EditAnywhere)
-	float m_mass = 1.0f;
+	float m_mass = 10.0f;
 
 	/// field of vision of boid, for neighbourhood
 	UPROPERTY(EditAnywhere)

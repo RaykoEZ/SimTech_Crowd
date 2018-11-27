@@ -3,6 +3,7 @@
 #include "Boid.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Engine/Classes/Components/SphereComponent.h"
+#include "Runtime/Engine/Classes/Engine/EngineTypes.h"
 
 
 // Sets default values
@@ -29,6 +30,8 @@ ABoid::ABoid()
 	m_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Test Boid Mesh"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Cone.Cone'"));
 	m_mesh->SetStaticMesh(MeshAsset.Object);
+	//Mobility
+	m_mesh->SetMobility(EComponentMobility::Movable);
 
 }
 
@@ -36,13 +39,26 @@ ABoid::ABoid()
 void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	m_invMass = 1.0f / m_mass;
+	//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_pos.X, m_pos.Y, m_pos.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("RootLoc : (%f , %f, %f)"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 }
 
 
 
 void ABoid::update()
 {
+	FVector steerF = ClampVector(m_facing.Vector(), FVector(-m_fMax), FVector(m_fMax));
+	FVector accel = steerF * m_invMass;
+	FVector oldV = m_v + accel;
+	m_v = ClampVector(oldV, FVector(-m_vMax*0.5f), FVector(m_vMax));
+	m_pos += m_v;
+	m_mesh->SetWorldLocation(m_pos);
+	//SetActorLocation(m_pos);
+	//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_pos.X, m_pos.Y, m_pos.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("dir : (%f , %f, %f)"), m_facing.Vector().X, m_facing.Vector().Y, m_facing.Vector().Z);
+
+	RootComponent->SetWorldLocation(m_pos);
 }
 
 void ABoid::updateNeighbour()
@@ -51,11 +67,12 @@ void ABoid::updateNeighbour()
 
 }
 
+
 // Called every frame
 void ABoid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	update();
 }
 
 //------------------------------------------------------------------------
@@ -65,22 +82,22 @@ void ABoid::Tick(float DeltaTime)
 /// Steering Behaviors For Autonomous Characters
 /// by Craig W.Reynolds, presented on GDC1999
 
-void ABoid::getTarget()
-{
-	return;
-}
+
 
 /// Seek a position to steer towards
 FVector ABoid::seek() const
 {
 	FVector desiredV = m_pos - m_target;
-	
-	FVector outV = desiredV.GetSafeNormal();
-	
-	outV *= m_vMax;
-	outV -= m_v;
+	if (!desiredV.IsZero())
+	{
+		FVector outV = desiredV.GetSafeNormal();
 
-	return outV;
+		outV *= m_vMax;
+		outV -= m_v;
+		return outV;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("boid reached target"));
+	return desiredV;
 }
 
 FVector ABoid::flee() const
