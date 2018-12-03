@@ -21,7 +21,7 @@ void APredatorBoid::BeginPlay()
 
 
 
-void APredatorBoid::update()
+void APredatorBoid::update(const float &_dt)
 {
 }
 

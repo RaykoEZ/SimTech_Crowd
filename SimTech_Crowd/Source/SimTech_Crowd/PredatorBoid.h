@@ -34,7 +34,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	virtual void update() override;
+	virtual void update(const float &_dt) override;
 	FVector followLead() const;
 
 public:	

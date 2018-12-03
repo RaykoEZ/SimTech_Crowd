@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Runtime/Core/Public/Templates/UniquePtr.h"
+#include "Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "Boid.generated.h"
 
 
@@ -32,7 +32,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	/// update per tick
-	virtual void update();
+	virtual void update(const float &_dt);
 	
 	/// update neighbourhood
 	void updateNeighbour();
@@ -51,17 +51,28 @@ protected:
 	/// pointers to boids in fov radius
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABoid*> m_neigbours;
+
+	/// when one or more antity enters boid's sphere of detection, 
+	/// delegate functions to bind SphereComponent overlap events
+	UFUNCTION()
+	void onBeginPresenceOverlap(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult);
+	UFUNCTION()
+	void onEndPresenceOverlap(UPrimitiveComponent* _overlappedComponent, AActor*_otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	/// Mesh for a boid
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent *m_mesh;
-
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	UStaticMeshComponent* m_mesh;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	USphereComponent* m_collision;
 	/// set and get type of void for builder
 	void setType(const EBoidType &_t) { m_type = _t; }
 	EBoidType getType() const { return m_type; }
+
+	void printDebug()const;
 
 	/// for a = f/m, 1/m pre-calculated
 	float m_invMass = 1.0f;
@@ -84,10 +95,6 @@ public:
 	/// max force
 	UPROPERTY(EditAnywhere)
 	float m_fMax;
-
-	/// Orientation of boid
-	UPROPERTY(BlueprintReadWrite)
-	FRotator m_facing;
 	
 	/// position of boid
 	UPROPERTY(BlueprintReadWrite)

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Boid.h"
+#include "Runtime/Engine/Classes/Camera/CameraComponent.h"
+#include "Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
 #include "SimWorldPawn.generated.h"
 
 UCLASS()
@@ -26,8 +28,14 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	/// initiate boids and pack to start the sim
+	void initSim();
 
 	UPROPERTY(BlueprintReadWrite)
 	ABoid* m_test;
+
+
+
+
 
 };
