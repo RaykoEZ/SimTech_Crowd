@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PredatorBoid.h"
 #include "PredatorPack.generated.h"
 
 UCLASS()
@@ -14,6 +15,15 @@ class SIMTECH_CROWD_API APredatorPack : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APredatorPack();
+	
+	UPROPERTY(BlueprintReadWrite)
+	TArray<APredatorBoid*> m_pack;
+	
+	UPROPERTY(BlueprintReadWrite)
+	APredatorBoid* m_leader;
+	
+	UPROPERTY(BlueprintReadWrite)
+	int m_numMember;
 
 protected:
 	// Called when the game starts or when spawned

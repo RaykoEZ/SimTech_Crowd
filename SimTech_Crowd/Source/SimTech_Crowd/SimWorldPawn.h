@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Boid.h"
+//#include "Boid.h"
+#include "PreyPack.h"
+#include "PredatorPack.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
 #include "SimWorldPawn.generated.h"
@@ -34,8 +36,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	ABoid* m_test;
 
+	UPROPERTY(BlueprintReadWrite)
+	APreyPack* m_preys;
 
-
+	UPROPERTY(BlueprintReadWrite)
+	APredatorPack* m_predators;
 
 
 };

@@ -13,8 +13,6 @@ UENUM(BlueprintType)
 enum class EWolfSocial : uint8
 {
 	ALPHA UMETA(DisplayName = "Alpha Male"),
-	HIGHER UMETA(DisplayName = "Higher Ranks"),
-	LOWER UMETA(DisplayName = "Lower Ranks"),
 	OMEGA UMETA(DisplayName = "Lowest Rank"),
 	OTHER UMETA(DisplayName = "Other")
 };
@@ -30,6 +28,9 @@ class SIMTECH_CROWD_API APredatorBoid : public ABoid
 public:	
 	// Sets default values for this actor's properties
 	APredatorBoid();
+
+	UPROPERTY()
+	EWolfSocial m_rank;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
