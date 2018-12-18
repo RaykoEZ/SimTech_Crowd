@@ -23,7 +23,7 @@ public:
 	APredatorBoid* m_leader;
 	
 	UPROPERTY(BlueprintReadWrite)
-	int m_numMember;
+	int m_numMember = 3;
 
 protected:
 	// Called when the game starts or when spawned

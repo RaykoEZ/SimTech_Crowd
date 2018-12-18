@@ -28,14 +28,18 @@ class SIMTECH_CROWD_API APredatorBoid : public ABoid
 public:	
 	// Sets default values for this actor's properties
 	APredatorBoid();
-
+	UFUNCTION()
+	static APredatorBoid* build();
 	UPROPERTY()
 	EWolfSocial m_rank;
+
+	virtual void update(const float &_dt) override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	virtual void update(const float &_dt) override;
+
+	UFUNCTION()
 	FVector followLead() const;
 
 public:	

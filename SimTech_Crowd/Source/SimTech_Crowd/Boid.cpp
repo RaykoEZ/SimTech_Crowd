@@ -7,20 +7,21 @@
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 
 
+
 // Sets default values
 ABoid::ABoid()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	m_invMass = 1 / m_mass;
+	//m_invMass = 1 / m_mass;
 	m_type = EBoidType::OTHER;
 
 	// setup root and sphere
 	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	m_collision = sphereComponent;
 	RootComponent = m_collision;
-	sphereComponent->InitSphereRadius(200.0f);
+	sphereComponent->InitSphereRadius(100.0f);
 	m_collision->bHiddenInGame = false;
 
 	//Start delegation for sphere
@@ -52,8 +53,10 @@ void ABoid::BeginPlay()
 /// movement of boid every frame
 void ABoid::update(const float &_dt)
 {
-	
+	FVector desiredV = m_target - m_pos;
+	FVector outV = desiredV.GetSafeNormal();
 	//FVector f = flee();
+
 	FVector f = seek();
 
 	FVector accel = f * m_invMass;
@@ -116,12 +119,13 @@ void ABoid::Tick(float DeltaTime)
 
 void ABoid::printDebug()const
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Draw"));
 	DrawDebugLine(GetWorld(),
 		m_pos,
 		FVector(m_pos + 100 * m_v),
 		FColor(255, 0, 0),
-		false, -1, 0,
-		12.333);
+		false, 0.1f, 0,
+		6.333);
 
 }
 

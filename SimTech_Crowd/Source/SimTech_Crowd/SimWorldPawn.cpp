@@ -46,17 +46,19 @@ void ASimWorldPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ASimWorldPawn::initSim()
 {
-	if (GetWorld())
+	auto world = GetWorld();
+	if (world)
 	{
-		m_test = GetWorld()->SpawnActor<ABoid>(FVector(0.0f, 0.0f, 0.0f), FRotator(0.0f));
-		m_test->m_target = FVector(100.0f, -100.0f, 0.0f);
-		//m_test->SetActorLocation(FVector(0.0f, 0.0f, 10.0f));
-		m_test->m_pos = m_test->GetActorLocation();
+		//m_test = world->SpawnActor<ABoid>(FVector(0.0f), FRotator(0.0f));
+		m_preys = world->SpawnActor<APreyPack>(FVector(0.0f), FRotator(0.0f));
+		//m_test->setTarget(FVector(100.0f, -100.0f, 0.0f));
+		
+		//m_test->m_pos = m_test->GetActorLocation();
 		//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_test->m_pos.X, m_test->m_pos.Y, m_test->m_pos.Z);
 
-		m_test->m_v = FVector(0.0f, 1.0f, 0.0f);
-		m_test->m_vMax = 1.0f;
-		m_test->m_fMax = 1.0f;
+		//m_test->m_v = FVector(0.0f, 1.0f, 0.0f);
+		//m_test->m_vMax = 1.0f;
+		//m_test->m_fMax = 1.0f;
 
 	}
 }

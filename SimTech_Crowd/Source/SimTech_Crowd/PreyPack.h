@@ -21,10 +21,13 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	APreyBoid* m_leader;
+
+	UPROPERTY()
+	int m_numMember = 3;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	void init();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

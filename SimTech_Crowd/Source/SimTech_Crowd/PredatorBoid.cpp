@@ -12,6 +12,11 @@ APredatorBoid::APredatorBoid()
 
 }
 
+APredatorBoid* APredatorBoid::build()
+{
+	return nullptr;
+}
+
 // Called when the game starts or when spawned
 void APredatorBoid::BeginPlay()
 {

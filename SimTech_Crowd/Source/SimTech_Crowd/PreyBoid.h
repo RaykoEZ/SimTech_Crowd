@@ -14,12 +14,14 @@ class SIMTECH_CROWD_API APreyBoid : public ABoid
 public:	
 	// Sets default values for this actor's properties
 	APreyBoid();
-
+	UFUNCTION()
+	static APreyBoid* build(UWorld* _w,const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
+	virtual void update(const float &_dt) override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	virtual void update(const float &_dt) override;
+
 	FVector evade() const;
 
 public:	

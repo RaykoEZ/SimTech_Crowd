@@ -27,18 +27,18 @@ class SIMTECH_CROWD_API ABoid : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABoid();
+	/// update per tick
+	virtual void update(const float &_dt);
+	/// update neighbourhood
+	void updateNeighbour();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/// update per tick
-	virtual void update(const float &_dt);
-	
-	/// update neighbourhood
-	void updateNeighbour();
-
 	FVector seek() const;
 	FVector flee() const;
+
+	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
 	FVector wander() const;
 	FVector separate() const;
@@ -52,6 +52,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABoid*> m_neigbours;
 
+	/// target position to move to/focus on
+	UPROPERTY(BlueprintReadWrite)
+		FVector m_target;
+
+	void printDebug()const;
 	/// when one or more antity enters boid's sphere of detection, 
 	/// delegate functions to bind SphereComponent overlap events
 	UFUNCTION()
@@ -62,17 +67,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/// Mesh for a boid
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
-	UStaticMeshComponent* m_mesh;
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	USphereComponent* m_collision;
 	/// set and get type of void for builder
 	void setType(const EBoidType &_t) { m_type = _t; }
 	EBoidType getType() const { return m_type; }
+	UFUNCTION()
+	void setTarget(const FVector &_pos) { m_target = _pos; }
 
-	void printDebug()const;
 
 	/// for a = f/m, 1/m pre-calculated
 	float m_invMass = 1.0f;
@@ -104,9 +104,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
 
-	/// target position to move to/focus on
-	UPROPERTY(BlueprintReadWrite)
-	FVector m_target;
-	
+
+	/// Mesh for a boid
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UStaticMeshComponent* m_mesh;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		USphereComponent* m_collision;
 
 };
