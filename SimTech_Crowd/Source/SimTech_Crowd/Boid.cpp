@@ -16,7 +16,7 @@ ABoid::ABoid()
 
 	//m_invMass = 1 / m_mass;
 	m_type = EBoidType::OTHER;
-
+	m_status = EBoidStatus::WANDERING;
 	// setup root and sphere
 	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	m_collision = sphereComponent;
@@ -34,7 +34,7 @@ ABoid::ABoid()
 	m_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Test Boid Mesh"));
 	//Mobility
 	m_mesh->SetMobility(EComponentMobility::Movable);
-
+	
 
 
 }
@@ -44,7 +44,6 @@ void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
 	m_invMass = 1.0f / m_mass;
-	
 	//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_pos.X, m_pos.Y, m_pos.Z);
 	//UE_LOG(LogTemp, Warning, TEXT("RootLoc : (%f , %f, %f)"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 }
@@ -53,6 +52,8 @@ void ABoid::BeginPlay()
 /// movement of boid every frame
 void ABoid::update(const float &_dt)
 {
+	// test for seek and flee
+
 	FVector desiredV = m_target - m_pos;
 	FVector outV = desiredV.GetSafeNormal();
 	//FVector f = flee();
@@ -72,40 +73,37 @@ void ABoid::update(const float &_dt)
 
 }
 
-void ABoid::updateNeighbour()
+void ABoid::handleStatus()
 {
-
-
 }
+
 
 /// delegate functions
 void ABoid::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult)
 {
-	// test
-	if (_otherActor->GetActorLocation().Z < m_pos.Z || _otherComp->GetComponentLocation().Z < m_pos.Z)
+	ABoid* intruder = Cast<ABoid>(_otherActor);
+	if(intruder!=nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Detected a thing entering below me"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Detected a thing entering sphere"));
-
+		m_neighbours.Add(intruder);
+		handleStatus();
+		//UE_LOG(LogTemp, Warning, TEXT("+1 Intruder Boid: %d boids in"),m_neighbours.Num());
 	}
 }
 
 void ABoid::onEndPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex)
 {
-
-	if (_otherActor->GetActorLocation().Z < m_pos.Z || _otherComp->GetComponentLocation().Z < m_pos.Z)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Detected a thing exiting below me"));
+	for(int i=0 ; i<m_neighbours.Num(); ++i)
+	{	
+		if(m_neighbours[i]==_otherActor)
+		{
+			m_neighbours.RemoveAt(i);
+			handleStatus();
+			//UE_LOG(LogTemp, Warning, TEXT("-1 Intruder Boid: %d boids in"), m_neighbours.Num());
+			return;
+		}
+	
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Detected a thing exiting sphere"));
-
-	}
-
+	
 }
 
 
@@ -123,9 +121,9 @@ void ABoid::printDebug()const
 	DrawDebugLine(GetWorld(),
 		m_pos,
 		FVector(m_pos + 100 * m_v),
-		FColor(255, 0, 0),
+		FColor(255.0f,0.0f,0.0f),
 		false, 0.1f, 0,
-		6.333);
+		16.333);
 
 }
 

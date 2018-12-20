@@ -29,11 +29,12 @@ public:
 	// Sets default values for this actor's properties
 	APredatorBoid();
 	UFUNCTION()
-	static APredatorBoid* build();
+	static APredatorBoid* build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
 	UPROPERTY()
 	EWolfSocial m_rank;
 
 	virtual void update(const float &_dt) override;
+	virtual void handleStatus() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

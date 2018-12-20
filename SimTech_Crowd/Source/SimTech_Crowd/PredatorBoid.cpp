@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PredatorBoid.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 
 
 // Sets default values
@@ -9,12 +10,17 @@ APredatorBoid::APredatorBoid()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	m_type = EBoidType::PREDATOR;
-
+	m_status = EBoidStatus::WANDERING;
 }
 
-APredatorBoid* APredatorBoid::build()
+APredatorBoid* APredatorBoid::build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
 {
-	return nullptr;
+	APredatorBoid* out = _w->SpawnActor<APredatorBoid>(_pos, FRotator(0.0f));
+	out->m_pos = _pos;
+	out->m_v = _v;
+	out->m_vMax = _vMax;
+	out->m_fMax = _fMax;
+	return out;
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +33,55 @@ void APredatorBoid::BeginPlay()
 
 
 void APredatorBoid::update(const float &_dt)
+{
+	//ABoid::update(_dt);
+	/// force we are using in different cases
+	FVector f;
+	/// do things according to your thing
+	switch (m_status)
+	{
+		case EBoidStatus::IDLE:
+		{
+
+			break;
+		}
+		case EBoidStatus::WANDERING:
+		{
+
+			break;
+		}
+		case EBoidStatus::FLEEING:
+		{
+			f = flee();
+			break;
+		}
+		case EBoidStatus::PURSUING:
+		{
+			f = seek();
+			break;
+		}
+		case EBoidStatus::REGROUP:
+		{
+
+			break;
+		}
+		case EBoidStatus::DEAD:
+			break;
+		default:
+			break;
+	}
+	FVector desiredV = m_target - m_pos;
+	FVector outV = desiredV.GetSafeNormal();
+
+	FVector accel = f * m_invMass;
+	FVector oldV = m_v + accel;
+	m_v = ClampVector(oldV, FVector(-m_vMax * 0.5f), FVector(m_vMax));
+	m_pos += m_v;
+	m_mesh->SetWorldLocation(m_pos);
+	RootComponent->SetWorldLocation(m_pos);
+}
+
+void APredatorBoid::handleStatus()
 {
 }
 

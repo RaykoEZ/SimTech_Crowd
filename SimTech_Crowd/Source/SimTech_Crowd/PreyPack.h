@@ -15,14 +15,13 @@ class SIMTECH_CROWD_API APreyPack : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APreyPack();
-
+	/// Pack of prey boids
+	/// Leader of the pack is boid of index 0
 	UPROPERTY(BlueprintReadWrite)
 	TArray<APreyBoid*> m_pack;
 	
-	UPROPERTY(BlueprintReadWrite)
-	APreyBoid* m_leader;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	int m_numMember = 3;
 protected:
 	// Called when the game starts or when spawned

@@ -15,12 +15,10 @@ class SIMTECH_CROWD_API APredatorPack : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APredatorPack();
-	
+	/// Leader of the pack is boid of index 0
 	UPROPERTY(BlueprintReadWrite)
 	TArray<APredatorBoid*> m_pack;
 	
-	UPROPERTY(BlueprintReadWrite)
-	APredatorBoid* m_leader;
 	
 	UPROPERTY(BlueprintReadWrite)
 	int m_numMember = 3;
@@ -28,7 +26,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	void init();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

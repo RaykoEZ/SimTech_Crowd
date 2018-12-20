@@ -33,9 +33,6 @@ void APreyPack::init()
 		UE_LOG(LogTemp, Warning, TEXT("m_pos Prey : (%f , %f, %f)"), m_pack[i]->m_pos.X, m_pack[i]->m_pos.Y, m_pack[i]->m_pos.Z);
 		m_pack[i]->setTarget(FVector(-200.0f, 200.0f, 0.0f));
 
-
-		
-
 	}
 }
 

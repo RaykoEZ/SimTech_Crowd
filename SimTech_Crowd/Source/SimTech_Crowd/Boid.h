@@ -19,6 +19,19 @@ enum class EBoidType : uint8
 
 };
 
+// Type of boid in scene
+UENUM(BlueprintType)
+enum class EBoidStatus : uint8
+{
+	IDLE UMETA(DisplayName = "Idle"),
+	WANDERING UMETA(DisplayName = "Wandering"),
+	FLEEING UMETA(DisplayName = "Fleeing"),
+	PURSUING UMETA(DisplayName = "Pursuing"),
+	REGROUP UMETA(DisplayName = "Regrouping"),
+	DEAD UMETA(DisplayName = "Dead")
+};
+
+
 UCLASS()
 class SIMTECH_CROWD_API ABoid : public AActor
 {
@@ -29,8 +42,9 @@ public:
 	ABoid();
 	/// update per tick
 	virtual void update(const float &_dt);
-	/// update neighbourhood
-	void updateNeighbour();
+	/// determine and change boid status for this boid
+	virtual void handleStatus();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,14 +61,19 @@ protected:
 	FVector avoidCollision() const;
 
 	/// type of boid
+	UPROPERTY(BlueprintReadOnly)
 	EBoidType m_type;
+
+	UPROPERTY(BlueprintReadOnly)
+	EBoidStatus m_status;
+
 	/// pointers to boids in fov radius
 	UPROPERTY(BlueprintReadOnly)
-	TArray<ABoid*> m_neigbours;
+	TArray<ABoid*> m_neighbours;
 
 	/// target position to move to/focus on
 	UPROPERTY(BlueprintReadWrite)
-		FVector m_target;
+	FVector m_target;
 
 	void printDebug()const;
 	/// when one or more antity enters boid's sphere of detection, 
@@ -75,6 +94,7 @@ public:
 
 
 	/// for a = f/m, 1/m pre-calculated
+	UPROPERTY(BlueprintReadOnly)
 	float m_invMass = 1.0f;
 	/// set mesh for a boid
 	UPROPERTY(EditAnywhere)
@@ -108,6 +128,7 @@ public:
 	/// Mesh for a boid
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UStaticMeshComponent* m_mesh;
+
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USphereComponent* m_collision;
