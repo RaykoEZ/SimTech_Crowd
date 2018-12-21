@@ -12,7 +12,7 @@ APreyBoid::APreyBoid()
 	PrimaryActorTick.bCanEverTick = true;
 	m_type = EBoidType::PREY;
 	//UE_LOG(LogTemp, Warning, TEXT("invmass: %f"),m_invMass);
-	m_status = EBoidStatus::IDLE;
+	m_status = EBoidStatus::WANDERING;
 }
 
 APreyBoid* APreyBoid::build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
@@ -53,7 +53,8 @@ void APreyBoid::update(const float &_dt)
 		}	
 		case EBoidStatus::WANDERING:
 		{
-
+			m_target = wander();
+			f = seek();
 			break;
 		}
 		case EBoidStatus::FLEEING:
@@ -90,7 +91,7 @@ void APreyBoid::update(const float &_dt)
 	m_pos += m_v;
 	m_mesh->SetWorldLocation(m_pos);
 	RootComponent->SetWorldLocation(m_pos);
-
+	printDebug(FColor(0.0f,255.0f,0.0f));
 }
 /// Changes boid states when neighbourhood updates
 void APreyBoid::handleStatus()

@@ -42,12 +42,14 @@ void APredatorBoid::update(const float &_dt)
 	{
 		case EBoidStatus::IDLE:
 		{
-
+			f = FVector(0.0f);
+			m_v = FVector(0.0f);
 			break;
 		}
 		case EBoidStatus::WANDERING:
 		{
-
+			m_target = wander();
+			f = seek();
 			break;
 		}
 		case EBoidStatus::FLEEING:
@@ -66,7 +68,11 @@ void APredatorBoid::update(const float &_dt)
 			break;
 		}
 		case EBoidStatus::DEAD:
+		{
+			f = FVector(0.0f);
+			m_v = FVector(0.0f);
 			break;
+		}
 		default:
 			break;
 	}
@@ -79,6 +85,7 @@ void APredatorBoid::update(const float &_dt)
 	m_pos += m_v;
 	m_mesh->SetWorldLocation(m_pos);
 	RootComponent->SetWorldLocation(m_pos);
+	printDebug(FColor(255.0f, 0.0, 0.0f));
 }
 
 void APredatorBoid::handleStatus()

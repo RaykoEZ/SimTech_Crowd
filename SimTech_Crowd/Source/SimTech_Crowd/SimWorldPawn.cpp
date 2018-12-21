@@ -51,6 +51,7 @@ void ASimWorldPawn::initSim()
 	{
 		//m_test = world->SpawnActor<ABoid>(FVector(0.0f), FRotator(0.0f));
 		m_preys = world->SpawnActor<APreyPack>(FVector(0.0f), FRotator(0.0f));
+		m_predators = world->SpawnActor<APredatorPack>(FVector(0.0f), FRotator(0.0f));
 		//m_test->setTarget(FVector(100.0f, -100.0f, 0.0f));
 		
 		//m_test->m_pos = m_test->GetActorLocation();

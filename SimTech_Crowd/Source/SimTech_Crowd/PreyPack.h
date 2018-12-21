@@ -20,7 +20,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<APreyBoid*> m_pack;
 	
-
+	/// determine where the spawn region is
+	UPROPERTY(EditAnywhere)
+	FVector m_spawnCentre;
+	UPROPERTY(EditAnywhere)
+	float m_spawnRad = 200.0f;
+	
 	UPROPERTY(BlueprintReadWrite)
 	int m_numMember = 3;
 protected:

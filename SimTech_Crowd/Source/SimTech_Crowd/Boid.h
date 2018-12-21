@@ -54,7 +54,7 @@ protected:
 
 	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
-	FVector wander() const;
+	FVector wander() const; /// d
 	FVector separate() const;
 	FVector cohesion() const;
 	FVector alignment() const;
@@ -75,7 +75,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_target;
 
-	void printDebug()const;
+	void printDebug(const FColor &_c)const;
 	/// when one or more antity enters boid's sphere of detection, 
 	/// delegate functions to bind SphereComponent overlap events
 	UFUNCTION()
@@ -123,6 +123,7 @@ public:
 	/// current velocity
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
+
 
 
 	/// Mesh for a boid

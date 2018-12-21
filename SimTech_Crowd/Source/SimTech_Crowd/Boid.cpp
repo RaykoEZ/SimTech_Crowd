@@ -115,13 +115,13 @@ void ABoid::Tick(float DeltaTime)
 	
 }
 
-void ABoid::printDebug()const
+void ABoid::printDebug(const FColor &_c)const
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Draw"));
 	DrawDebugLine(GetWorld(),
 		m_pos,
 		FVector(m_pos + 100 * m_v),
-		FColor(255.0f,0.0f,0.0f),
+		_c,
 		false, 0.1f, 0,
 		16.333);
 
@@ -149,7 +149,7 @@ FVector ABoid::seek() const
 	
 		outV.Z = 0.0f;
 		// Draw direction line for debug
-		printDebug();
+		
 		return outV;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("boid reached target"));
@@ -177,7 +177,12 @@ FVector ABoid::pursue(const FVector &_futureP) const
 
 FVector ABoid::wander() const
 {
-	return FVector();
+
+	FVector future = m_pos + 10.0f * m_v;
+	FVector randRot = FRotator(0.0f, FMath::RandRange(-180.0f, 180.0f), 0.0f).Vector();
+	FVector randPos = future + 5.0f * randRot;
+	
+	return randPos;
 }
 
 FVector ABoid::separate() const
