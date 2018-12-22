@@ -21,7 +21,7 @@ ABoid::ABoid()
 	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	m_collision = sphereComponent;
 	RootComponent = m_collision;
-	sphereComponent->InitSphereRadius(100.0f);
+	sphereComponent->InitSphereRadius(m_collisionRad);
 	m_collision->bHiddenInGame = false;
 
 	//Start delegation for sphere
@@ -115,6 +115,34 @@ void ABoid::Tick(float DeltaTime)
 	
 }
 
+TArray<int> ABoid::searchPrey() const
+{
+	TArray<int> out;
+	for(int i = 0; i < m_neighbours.Num(); ++i)
+	{
+		if (m_neighbours[i]->m_type == EBoidType::PREY) 
+		{
+			out.Add(i);
+		}
+	}
+
+	return out;
+}
+
+TArray<int> ABoid::searchPredator() const
+{
+	TArray<int> out;
+	for (int i = 0; i < m_neighbours.Num(); ++i)
+	{
+		if (m_neighbours[i]->m_type == EBoidType::PREDATOR)
+		{
+			out.Add(i);
+		}
+	}
+
+	return out;
+}
+
 void ABoid::printDebug(const FColor &_c)const
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Draw"));
@@ -133,6 +161,7 @@ void ABoid::printDebug(const FColor &_c)const
 /// Implementations are based on this paper :
 /// Steering Behaviors For Autonomous Characters
 /// by Craig W.Reynolds, presented on GDC1999
+
 
 
 
@@ -185,19 +214,84 @@ FVector ABoid::wander() const
 	return randPos;
 }
 
-FVector ABoid::separate() const
+FVector ABoid::separate() 
 {
-	return FVector();
+	float comfortDist = 0.5f * m_collisionRad;
+	FVector newV;
+	for(int i =0; i<m_neighbours.Num(); ++i)
+	{
+		float dist = FVector::Dist(m_pos, m_neighbours[i]->m_pos);
+		if (dist > 0 && dist < comfortDist) 
+		{
+			FVector diffV = (m_pos - m_neighbours[i]->m_pos).GetSafeNormal();
+			diffV /= dist;
+			newV += diffV;
+		}
+	}
+	return (newV/m_neighbours.Num()).GetSafeNormal();
 }
 
-FVector ABoid::cohesion() const
+FVector ABoid::cohesion() 
 {
-	return FVector();
+	TArray<int> idx;
+	FVector newP;
+	if (idx.Num() < 0)
+	{
+		switch (m_type)
+		{
+		case EBoidType::PREDATOR:
+		{
+			idx = searchPredator();
+			break;
+		}
+		case EBoidType::PREY:
+		{
+			idx = searchPrey();
+			break;
+		}
+		default:
+			break;
+		}
+
+		for (int i = 0; i < idx.Num(); ++i)
+		{
+			newP += m_neighbours[idx[i]]->m_pos;
+		}
+		newP /= idx.Num();
+		m_target = newP;
+	}
+	return seek();
 }
 
-FVector ABoid::alignment() const
+void ABoid::alignment() 
 {
-	return FVector();
+	TArray<int> idx;
+	FVector newV;
+	if (idx.Num() < 0)
+	{
+		switch (m_type)
+		{
+		case EBoidType::PREDATOR:
+		{
+			idx = searchPredator();
+			break;
+		}
+		case EBoidType::PREY:
+		{
+			idx = searchPrey();
+			break;
+		}
+		default:
+			break;
+		}
+
+		for (int i = 0; i < idx.Num(); ++i)
+		{
+			newV += m_neighbours[idx[i]]->m_v;
+		}
+		newV /= idx.Num();
+		m_v = newV;
+	}
 }
 
 FVector ABoid::avoidCollision() const

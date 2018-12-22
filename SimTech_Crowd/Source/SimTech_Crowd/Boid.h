@@ -55,9 +55,9 @@ protected:
 	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
 	FVector wander() const; /// d
-	FVector separate() const;
-	FVector cohesion() const;
-	FVector alignment() const;
+	FVector separate();
+	FVector cohesion();
+	void alignment();
 	FVector avoidCollision() const;
 
 	/// type of boid
@@ -74,6 +74,10 @@ protected:
 	/// target position to move to/focus on
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_target;
+
+	/// Search for neighbourhood boid types and returns indexes of said types
+	TArray<int> searchPrey() const;
+	TArray<int> searchPredator()const;
 
 	void printDebug(const FColor &_c)const;
 	/// when one or more antity enters boid's sphere of detection, 
@@ -104,10 +108,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	float m_fov = 60.0f;
 
-	/// radius of vision field for nieghbourhood
-	UPROPERTY(EditAnywhere)
-	float m_vRad = 1.0f;
-
 	/// max speed scalr
 	UPROPERTY(EditAnywhere)
 	float m_vMax;
@@ -128,10 +128,12 @@ public:
 
 	/// Mesh for a boid
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UStaticMeshComponent* m_mesh;
+	UStaticMeshComponent* m_mesh;
 
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		USphereComponent* m_collision;
+	USphereComponent* m_collision;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float m_collisionRad = 100.0f;
 };
