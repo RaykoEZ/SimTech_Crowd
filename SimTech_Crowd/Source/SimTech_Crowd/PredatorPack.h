@@ -18,6 +18,10 @@ public:
 	/// Leader of the pack is boid of index 0
 	UPROPERTY(BlueprintReadWrite)
 	TArray<APredatorBoid*> m_pack;
+
+	UPROPERTY()
+	APredatorPack* m_self;
+
 	/// determine where the spawn region is
 	UPROPERTY(EditAnywhere)
 	FVector m_spawnCentre;

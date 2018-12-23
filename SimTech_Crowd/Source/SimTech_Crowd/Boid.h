@@ -28,6 +28,7 @@ enum class EBoidStatus : uint8
 	FLEEING UMETA(DisplayName = "Fleeing"),
 	PURSUING UMETA(DisplayName = "Pursuing"),
 	REGROUP UMETA(DisplayName = "Regrouping"),
+	ALIGN UMETA(DisplayName = "Aligning"),
 	DEAD UMETA(DisplayName = "Dead")
 };
 
@@ -55,9 +56,9 @@ protected:
 	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
 	FVector wander() const; /// d
-	FVector separate();
-	FVector cohesion();
-	void alignment();
+	FVector separate(); ///d
+	FVector cohesion(); ///d
+	void alignment(); ///d
 	FVector avoidCollision() const;
 
 	/// type of boid
@@ -123,8 +124,7 @@ public:
 	/// current velocity
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
-
-
+	
 
 	/// Mesh for a boid
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

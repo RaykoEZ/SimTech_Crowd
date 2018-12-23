@@ -17,8 +17,8 @@ enum class EWolfSocial : uint8
 	OTHER UMETA(DisplayName = "Other")
 };
 
-
-
+/// predefineclass
+class APredatorPack;
 
 UCLASS()
 class SIMTECH_CROWD_API APredatorBoid : public ABoid
@@ -29,7 +29,7 @@ public:
 	// Sets default values for this actor's properties
 	APredatorBoid();
 	UFUNCTION()
-	static APredatorBoid* build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
+	static APredatorBoid* build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
 	UPROPERTY()
 	EWolfSocial m_rank;
 
@@ -38,11 +38,14 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
 
 	UFUNCTION()
 	FVector followLead() const;
 
+
+	/// Pointer to the pack this boid belonggs to
+	UPROPERTY()
+	APredatorPack* m_myPack;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

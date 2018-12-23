@@ -2,6 +2,7 @@
 
 #include "PredatorBoid.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "PredatorPack.h"
 
 
 // Sets default values
@@ -13,13 +14,15 @@ APredatorBoid::APredatorBoid()
 	m_status = EBoidStatus::WANDERING;
 }
 
-APredatorBoid* APredatorBoid::build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
+APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
 {
-	APredatorBoid* out = _w->SpawnActor<APredatorBoid>(_pos, FRotator(0.0f));
+	APredatorBoid* out = NewObject<APredatorBoid>();
 	out->m_pos = _pos;
 	out->m_v = _v;
 	out->m_vMax = _vMax;
 	out->m_fMax = _fMax;
+	out->m_myPack = _p;
+
 	return out;
 }
 
@@ -28,6 +31,8 @@ void APredatorBoid::BeginPlay()
 {
 	Super::BeginPlay();
 	
+
+
 }
 
 
@@ -63,6 +68,11 @@ void APredatorBoid::update(const float &_dt)
 			break;
 		}
 		case EBoidStatus::REGROUP:
+		{
+
+			break;
+		}
+		case EBoidStatus::ALIGN:
 		{
 
 			break;

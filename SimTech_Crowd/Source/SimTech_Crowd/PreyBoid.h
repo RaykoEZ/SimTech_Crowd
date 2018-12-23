@@ -6,6 +6,8 @@
 #include "Boid.h"
 #include "PreyBoid.generated.h"
 
+class APreyPack;
+
 UCLASS()
 class SIMTECH_CROWD_API APreyBoid : public ABoid
 {
@@ -15,7 +17,7 @@ public:
 	// Sets default values for this actor's properties
 	APreyBoid();
 	UFUNCTION()
-	static APreyBoid* build(UWorld* _w,const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
+	static APreyBoid* build(UWorld* _w,APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
 	virtual void update(const float &_dt) override;
 	virtual void handleStatus() override;
 protected:
@@ -25,10 +27,13 @@ protected:
 
 	FVector evade() const;
 
+	/// Pointer to the pack this boid belonggs to
+	UPROPERTY()
+	APreyPack* m_myPack;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+
 	
 };

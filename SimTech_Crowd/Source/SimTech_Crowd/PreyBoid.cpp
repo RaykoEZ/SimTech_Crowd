@@ -3,6 +3,7 @@
 #include "PreyBoid.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "PreyPack.h"
 
 
 // Sets default values
@@ -15,24 +16,27 @@ APreyBoid::APreyBoid()
 	m_status = EBoidStatus::WANDERING;
 }
 
-APreyBoid* APreyBoid::build(UWorld* _w, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
+APreyBoid* APreyBoid::build(UWorld* _w, APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
 {
-	
-	APreyBoid* out = _w->SpawnActor<APreyBoid>(_pos, FRotator(0.0f));
+	APreyBoid* out = NewObject<APreyBoid>();
 	out->m_pos = _pos;
 	out->m_v = _v;
 	out->m_vMax = _vMax;
 	out->m_fMax = _fMax;
+	out->m_myPack = _p;
 	return out;
 }
 
 // Called when the game starts or when spawned
+/// Please don't use m_myPack here, it is not initialized at this point in time
 void APreyBoid::BeginPlay()
 {
 	Super::BeginPlay();
 	SetActorLocation(m_pos);
 	//UE_LOG(LogTemp, Warning, TEXT("m_pos Prey : (%f , %f, %f)"), m_pos.X, m_pos.Y, m_pos.Z);
-
+	bool valid = IsValid(m_myPack);
+	UE_LOG(LogTemp, Warning, TEXT("valid ref? %s"), valid ? TEXT("true") : TEXT("false"));
+	//UE_LOG(LogTemp, Warning, TEXT("valid ref? %f"), m_myPack->m_spawnRad);
 }
 
 
@@ -72,6 +76,11 @@ void APreyBoid::update(const float &_dt)
 
 			break;
 		}
+		case EBoidStatus::ALIGN:
+		{
+
+			break;
+		}
 		case EBoidStatus::DEAD:
 		{
 			f = FVector(0.0f);
@@ -92,6 +101,9 @@ void APreyBoid::update(const float &_dt)
 	m_mesh->SetWorldLocation(m_pos);
 	RootComponent->SetWorldLocation(m_pos);
 	printDebug(FColor(0.0f,255.0f,0.0f));
+
+	
+
 }
 /// Changes boid states when neighbourhood updates
 void APreyBoid::handleStatus()
