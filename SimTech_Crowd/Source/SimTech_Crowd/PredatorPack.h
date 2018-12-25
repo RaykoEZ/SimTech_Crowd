@@ -19,17 +19,17 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<APredatorBoid*> m_pack;
 
-	UPROPERTY()
-	APredatorPack* m_self;
-
 	/// determine where the spawn region is
 	UPROPERTY(EditAnywhere)
 	FVector m_spawnCentre;
 	UPROPERTY(EditAnywhere)
-	float m_spawnRad = 500.0f;
-	
+	float m_spawnRad;
+	UPROPERTY()
+	float m_packRad;
+	UPROPERTY()
+	float m_worldRad;
 	UPROPERTY(BlueprintReadWrite)
-	int m_numMember = 3;
+	int m_numMember;
 
 protected:
 	// Called when the game starts or when spawned

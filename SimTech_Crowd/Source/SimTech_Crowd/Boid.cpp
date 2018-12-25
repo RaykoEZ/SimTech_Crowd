@@ -18,9 +18,10 @@ ABoid::ABoid()
 	m_type = EBoidType::OTHER;
 	m_status = EBoidStatus::WANDERING;
 	// setup root and sphere
-	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
+	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootScene"));
 	m_collision = sphereComponent;
 	RootComponent = m_collision;
+	m_collisionRad = 200.0f;
 	sphereComponent->InitSphereRadius(m_collisionRad);
 	m_collision->bHiddenInGame = false;
 
@@ -35,7 +36,7 @@ ABoid::ABoid()
 	//Mobility
 	m_mesh->SetMobility(EComponentMobility::Movable);
 	
-
+	m_isOutOfBound = false;
 
 }
 
@@ -148,10 +149,10 @@ void ABoid::printDebug(const FColor &_c)const
 	//UE_LOG(LogTemp, Warning, TEXT("Draw"));
 	DrawDebugLine(GetWorld(),
 		m_pos,
-		FVector(m_pos + 100 * m_v),
+		FVector(m_pos + 120 * m_v),
 		_c,
 		false, 0.1f, 0,
-		16.333);
+		30.0f);
 
 }
 
@@ -181,7 +182,7 @@ FVector ABoid::seek() const
 		
 		return outV;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("boid reached target"));
+	//UE_LOG(LogTemp, Warning, TEXT("boid reached target"));
 	return desiredV;
 }
 
@@ -206,7 +207,7 @@ FVector ABoid::pursue(const FVector &_futureP) const
 
 FVector ABoid::wander() const
 {
-
+	
 	FVector future = m_pos + 10.0f * m_v;
 	FVector randRot = FRotator(0.0f, FMath::RandRange(-180.0f, 180.0f), 0.0f).Vector();
 	FVector randPos = future + 5.0f * randRot;
@@ -214,56 +215,66 @@ FVector ABoid::wander() const
 	return randPos;
 }
 
-FVector ABoid::separate() 
+FVector ABoid::separate()
 {
-	float comfortDist = 0.5f * m_collisionRad;
+	float comfortDist = 0.1f * m_collisionRad;
 	FVector newV;
-	for(int i =0; i<m_neighbours.Num(); ++i)
+	if (m_neighbours.Num() > 0) 
 	{
-		float dist = FVector::Dist(m_pos, m_neighbours[i]->m_pos);
-		if (dist > 0 && dist < comfortDist) 
+		for (int i = 0; i < m_neighbours.Num(); ++i)
 		{
-			FVector diffV = (m_pos - m_neighbours[i]->m_pos).GetSafeNormal();
-			diffV /= dist;
-			newV += diffV;
+			float dist = FVector::Dist(m_pos, m_neighbours[i]->m_pos);
+			if (dist > 0 && dist < comfortDist)
+			{
+				FVector diffV = (m_pos - m_neighbours[i]->m_pos).GetSafeNormal();
+				diffV /= dist;
+				newV += diffV;
+			}
 		}
+		newV = (newV / m_neighbours.Num()).GetSafeNormal();
+		return FVector(newV.X, newV.Y, 0.0f);
+	
 	}
-	return (newV/m_neighbours.Num()).GetSafeNormal();
+	return m_v;
 }
 
-FVector ABoid::cohesion() 
+FVector ABoid::cohesion(const EBoidType &_t)
 {
 	TArray<int> idx;
 	FVector newP;
-	if (idx.Num() < 0)
+	switch (_t)
 	{
-		switch (m_type)
-		{
-		case EBoidType::PREDATOR:
-		{
-			idx = searchPredator();
-			break;
-		}
-		case EBoidType::PREY:
-		{
-			idx = searchPrey();
-			break;
-		}
-		default:
-			break;
-		}
+	case EBoidType::PREDATOR:
+	{
+		idx = searchPredator();
+		break;
+	}
+	case EBoidType::PREY:
+	{
+		idx = searchPrey();
+		break;
+	}
+	default:
+		break;
+	}
 
+	if (idx.Num() > 0)
+	{
+		
 		for (int i = 0; i < idx.Num(); ++i)
 		{
 			newP += m_neighbours[idx[i]]->m_pos;
 		}
 		newP /= idx.Num();
-		m_target = newP;
+		//UE_LOG(LogTemp, Warning, TEXT("newP : (%f , %f, %f)"), newP.X, newP.Y, newP.Z);
+
+		//m_target = newP;
+		return newP;
 	}
-	return seek();
+	return m_target;
 }
 
-void ABoid::alignment() 
+FVector ABoid::alignment()
 {
 	TArray<int> idx;
 	FVector newV;
@@ -290,14 +301,11 @@ void ABoid::alignment()
 			newV += m_neighbours[idx[i]]->m_v;
 		}
 		newV /= idx.Num();
-		m_v = newV;
+		return newV;
 	}
+	return m_v;
 }
 
-FVector ABoid::avoidCollision() const
-{
-	return FVector();
-}
 
 
 

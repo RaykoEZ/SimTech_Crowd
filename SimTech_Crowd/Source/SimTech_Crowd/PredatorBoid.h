@@ -6,7 +6,7 @@
 #include "Boid.h"
 #include "PredatorBoid.generated.h"
 
-
+class APreyBoid;
 
 // Wolf Social Hierarchy
 UENUM(BlueprintType)
@@ -42,10 +42,13 @@ protected:
 	UFUNCTION()
 	FVector followLead() const;
 
-
+	UFUNCTION()
+	FVector regroup();
 	/// Pointer to the pack this boid belonggs to
 	UPROPERTY()
 	APredatorPack* m_myPack;
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

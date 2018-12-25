@@ -28,7 +28,6 @@ enum class EBoidStatus : uint8
 	FLEEING UMETA(DisplayName = "Fleeing"),
 	PURSUING UMETA(DisplayName = "Pursuing"),
 	REGROUP UMETA(DisplayName = "Regrouping"),
-	ALIGN UMETA(DisplayName = "Aligning"),
 	DEAD UMETA(DisplayName = "Dead")
 };
 
@@ -55,11 +54,14 @@ protected:
 
 	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
-	FVector wander() const; /// d
+
+	/// Returns random direction to steer forward
+	FVector wander()const; /// d
+	/// Returns direction vector facing away from the average neighbourhood
 	FVector separate(); ///d
-	FVector cohesion(); ///d
-	void alignment(); ///d
-	FVector avoidCollision() const;
+	/// Returns a target vector to steer the boid towards to approach a neighbourhood
+	FVector cohesion(const EBoidType &_t); ///d
+	FVector alignment(); ///d
 
 	/// type of boid
 	UPROPERTY(BlueprintReadOnly)
@@ -72,9 +74,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABoid*> m_neighbours;
 
-	/// target position to move to/focus on
-	UPROPERTY(BlueprintReadWrite)
-	FVector m_target;
 
 	/// Search for neighbourhood boid types and returns indexes of said types
 	TArray<int> searchPrey() const;
@@ -100,19 +99,17 @@ public:
 
 	/// for a = f/m, 1/m pre-calculated
 	UPROPERTY(BlueprintReadOnly)
-	float m_invMass = 1.0f;
+	float m_invMass;
 	/// set mesh for a boid
 	UPROPERTY(EditAnywhere)
 	float m_mass = 10.0f;
 
-	/// field of vision of boid, for neighbourhood
-	UPROPERTY(EditAnywhere)
-	float m_fov = 60.0f;
-
 	/// max speed scalr
 	UPROPERTY(EditAnywhere)
 	float m_vMax;
-
+	/// max speed scalr default
+	UPROPERTY()
+	float m_vMaxDef;
 	/// max force
 	UPROPERTY(EditAnywhere)
 	float m_fMax;
@@ -124,7 +121,9 @@ public:
 	/// current velocity
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
-	
+	/// target position to move to/focus on
+	UPROPERTY(BlueprintReadWrite)
+	FVector m_target;
 
 	/// Mesh for a boid
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -135,5 +134,8 @@ public:
 	USphereComponent* m_collision;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float m_collisionRad = 100.0f;
+	float m_collisionRad;
+
+	UPROPERTY()
+	bool m_isOutOfBound;
 };

@@ -8,7 +8,7 @@
 #include "PreyPack.h"
 #include "PredatorPack.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
-#include "Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
+#include "Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "SimWorldPawn.generated.h"
 
 UCLASS()
@@ -42,5 +42,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	APredatorPack* m_predators;
 
+	UPROPERTY()
+	USphereComponent* m_bound;
 
+	UPROPERTY()
+	float m_worldRad;
+	/// Direct boid back into the test bound
+	UFUNCTION()
+	void onBoidLeavingBound(UPrimitiveComponent* _overlappedComponent, AActor*_otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex);
 };
