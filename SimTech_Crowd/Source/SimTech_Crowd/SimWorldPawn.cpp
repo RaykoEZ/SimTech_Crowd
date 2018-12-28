@@ -18,7 +18,7 @@ ASimWorldPawn::ASimWorldPawn()
 	
 	m_bound = sphereComponent;
 	//m_bound->AttachTo(RootComponent);
-	m_worldRad = 9000.0f;
+	m_worldRad = 25000.0f;
 	sphereComponent->SetSphereRadius(m_worldRad);
 
 	
@@ -65,6 +65,7 @@ void ASimWorldPawn::initSim()
 		//m_test->setTarget(FVector(100.0f, -100.0f, 0.0f));
 		m_preys->m_worldRad = m_worldRad;
 		m_predators->m_worldRad = m_worldRad;
+		m_predators->m_targetPack = m_preys;
 		//m_test->m_pos = m_test->GetActorLocation();
 		//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_test->m_pos.X, m_test->m_pos.Y, m_test->m_pos.Z);
 
@@ -83,7 +84,7 @@ void ASimWorldPawn::onBoidLeavingBound(UPrimitiveComponent * _overlappedComponen
 		escapee->m_isOutOfBound = true;
 		escapee->handleStatus();
 		//escapee->m_target *= 0.5;
-		UE_LOG(LogTemp, Warning, TEXT("Boid out of bound, guiding back"));
+		//UE_LOG(LogTemp, Warning, TEXT("Boid out of bound, guiding back"));
 	}
 	
 }

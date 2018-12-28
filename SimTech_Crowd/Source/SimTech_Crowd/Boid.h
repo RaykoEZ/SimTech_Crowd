@@ -27,8 +27,7 @@ enum class EBoidStatus : uint8
 	WANDERING UMETA(DisplayName = "Wandering"),
 	FLEEING UMETA(DisplayName = "Fleeing"),
 	PURSUING UMETA(DisplayName = "Pursuing"),
-	REGROUP UMETA(DisplayName = "Regrouping"),
-	DEAD UMETA(DisplayName = "Dead")
+	REGROUP UMETA(DisplayName = "Regrouping")
 };
 
 
@@ -45,24 +44,25 @@ public:
 	/// determine and change boid status for this boid
 	virtual void handleStatus();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	FVector seek() const;
-	FVector flee() const;
-
+	FVector flee();
+	void resolve(const FVector &_f);
 	/// implement these:
 	FVector pursue(const FVector &_futureP) const;
 
 	/// Returns random direction to steer forward
 	FVector wander()const; /// d
+
+	FVector turnBack()const; /// d
 	/// Returns direction vector facing away from the average neighbourhood
 	FVector separate(); ///d
 	/// Returns a target vector to steer the boid towards to approach a neighbourhood
 	FVector cohesion(const EBoidType &_t); ///d
 	FVector alignment(); ///d
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 	/// type of boid
 	UPROPERTY(BlueprintReadOnly)
 	EBoidType m_type;
@@ -76,8 +76,14 @@ protected:
 
 
 	/// Search for neighbourhood boid types and returns indexes of said types
+	UFUNCTION()
 	TArray<int> searchPrey() const;
+	UFUNCTION()
 	TArray<int> searchPredator()const;
+	UFUNCTION()
+	TArray<ABoid*> getPredator() const;
+	UFUNCTION()
+	TArray<ABoid*> getPrey() const;
 
 	void printDebug(const FColor &_c)const;
 	/// when one or more antity enters boid's sphere of detection, 
@@ -96,7 +102,8 @@ public:
 	UFUNCTION()
 	void setTarget(const FVector &_pos) { m_target = _pos; }
 
-
+	UPROPERTY()
+	int m_id;
 	/// for a = f/m, 1/m pre-calculated
 	UPROPERTY(BlueprintReadOnly)
 	float m_invMass;

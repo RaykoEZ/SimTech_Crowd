@@ -12,6 +12,10 @@ APredatorBoid::APredatorBoid()
 	PrimaryActorTick.bCanEverTick = true;
 	m_type = EBoidType::PREDATOR;
 	m_status = EBoidStatus::WANDERING;
+	m_readyToHunt = false;
+	m_collisionRad = 500.0f;
+	m_collision->InitSphereRadius(m_collisionRad);
+
 }
 
 APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
@@ -31,7 +35,6 @@ APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector
 void APredatorBoid::BeginPlay()
 {
 	Super::BeginPlay();
-	
 
 
 }
@@ -40,146 +43,81 @@ void APredatorBoid::BeginPlay()
 
 void APredatorBoid::update(const float &_dt)
 {
-	//ABoid::update(_dt);
 	/// force we are using in different cases
-	FVector f;
 	/// do things according to your thing
 	
-	switch (m_status)
+	FVector f;
+	if(m_myPack->m_huntStatus==EPackStatus::HUNTING)
 	{
-		case EBoidStatus::IDLE:
-		{
-			f = FVector(0.0f);
-			m_v = FVector(0.0f);
-			m_target = m_pos;
-			//UE_LOG(LogTemp, Warning, TEXT("Idle!"));
+		//UE_LOG(LogTemp, Warning, TEXT("HUNT!"));
 
-			break;
-		}
-		case EBoidStatus::WANDERING:
-		{
-			m_vMax = m_vMaxDef;
-			float dist = FVector::Dist(m_pos, m_myPack->m_pack[0]->m_pos);
-			if (dist > m_myPack->m_packRad)
-			{
-				m_status = EBoidStatus::REGROUP;
-				//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
-			}
-			else
-			{
-				m_target = wander();
-				f = seek();
-				//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
-			}
-			
-			break;
-		}
-		case EBoidStatus::PURSUING:
-		{
-			m_vMax = FMath::Clamp(m_vMax*1.3f, 1.0f, 4.0f);
-			m_target = cohesion(EBoidType::PREY);
-			f = seek();
-			//UE_LOG(LogTemp, Warning, TEXT("Pursue!"));
+		handleStatus();
+		f = genericBehaviour(f);
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("TACTICS!"));
 
-			break;
-		}
-		case EBoidStatus::REGROUP:
-		{
-			float dist = FVector::Dist(m_pos, m_myPack->m_pack[0]->m_pos);
-			float distO = FVector::Dist(m_pos, FVector(0.0f));
-
-			//UE_LOG(LogTemp, Warning, TEXT("Dist %f"), dist);
-			//UE_LOG(LogTemp, Warning, TEXT("Dist %f"), distO);
-			//UE_LOG(LogTemp, Warning, TEXT("PackRad %f"), m_myPack->m_packRad);
-			//UE_LOG(LogTemp, Warning, TEXT("WRad %f"), m_myPack->m_worldRad);
-
-
-			if(dist > m_myPack->m_packRad || distO > m_myPack->m_worldRad)
-			{
-				m_target = regroup();
-				f = seek();
-				//UE_LOG(LogTemp, Warning, TEXT("REGROUP!"));
-			}
-			else
-			{
-				m_isOutOfBound = false;
-				m_status = EBoidStatus::WANDERING;
-				//UE_LOG(LogTemp, Warning, TEXT("REGROUPed, now wandering!"));
-			}
-			
-
-			break;
-		}
-		case EBoidStatus::DEAD:
-		{
-			f = FVector(0.0f);
-			m_v = FVector(0.0f);
-			m_target = m_pos;
-			break;
-		}
-		default:
-
-			break;
+		f = tacticalBehaviour(f);
 	}
 
-	FVector desiredV = m_target - m_pos;
-	FVector outV = desiredV.GetSafeNormal();
-
-	FVector accel = f * m_invMass;
-	FVector oldV = m_v + accel;
-	m_v = ClampVector(oldV, FVector(-m_vMax,-m_vMax,0.0f), FVector(m_vMax, m_vMax,0.0f));
-	m_pos += m_v;
-	/// Update visuals
-	m_mesh->SetWorldLocation(m_pos);
-	RootComponent->SetWorldLocation(m_pos);
+	resolve(f);
 	printDebug(FColor(255.0f, 0.0, 0.0f));
 }
 
 
-
-
 void APredatorBoid::handleStatus()
 {
+	
 	/// Predators lost preys
-	if (m_isOutOfBound)
-	{
-		m_status = EBoidStatus::REGROUP;	
-		//m_isOutOfBound = false;
-		//UE_LOG(LogTemp, Warning, TEXT("Out of hunting ground!"));
-
-		return;
-	}
-	if (searchPrey().Num() > 0)
+	float dist = FVector::Dist(m_pos, m_myPack->m_pack[0]->m_pos);
+	float distO = FVector::Dist(m_pos, FVector(0.0f));
+	if (m_myPack->m_desiredPrey != nullptr)
 	{
 		
 		m_status = EBoidStatus::PURSUING;
 		//UE_LOG(LogTemp, Warning, TEXT("Found prey!"));
 		//m_vMax *= 1.15f;
-		
+		return;
 	}
-	else 
+
+	if (dist > m_myPack->m_spawnRad || distO > m_myPack->m_worldRad)
+	{
+		m_isOutOfBound = true;
+	}
+	else
+	{
+		m_isOutOfBound = false;
+	}
+
+	if (m_isOutOfBound)
+	{
+		m_status = EBoidStatus::REGROUP;
+		//m_isOutOfBound = false;
+		//UE_LOG(LogTemp, Warning, TEXT("Out of hunting ground!"));
+
+		return;
+	}
+	else
 	{
 		m_status = EBoidStatus::WANDERING;
 		//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
 
 	}
-
 }
 
-FVector APredatorBoid::followLead() const
-{
-	return FVector();
-}
+
 
 FVector APredatorBoid::regroup()
 {
 	// get a random position in leader's direction
 
-
-	if (m_myPack->m_pack[0] != this)
+	if (m_id != 0)
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("REGROUP!"));
+
 		FVector bossTarget = m_myPack->m_pack[0]->wander();
-		float r = m_myPack->m_packRad;
+		float r = m_myPack->m_spawnRad;
 		m_vMax = FMath::Clamp(m_vMax*1.5f, 1.0f, 5.0f);
 
 		FVector aprxTarget = bossTarget +
@@ -188,9 +126,129 @@ FVector APredatorBoid::regroup()
 		return aprxTarget;
 	}
 	m_vMax = m_vMaxDef;
-	m_v =  - m_pos.GetSafeNormal();
+	m_v =   -m_pos.GetSafeNormal();
 	return wander();
 }
+
+FVector APredatorBoid::genericBehaviour(const FVector &_f)
+{
+	FVector f = _f;
+	switch (m_status)
+	{
+	case EBoidStatus::IDLE:
+	{
+		f = FVector(0.0f);
+		m_v = FVector(0.0f);
+		m_target = m_pos;
+		//UE_LOG(LogTemp, Warning, TEXT("Idle!"));
+
+		break;
+	}
+	case EBoidStatus::WANDERING:
+	{
+		m_vMax = m_vMaxDef;
+		m_target = wander();
+		f = seek();
+		//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
+
+
+		break;
+	}
+	case EBoidStatus::PURSUING:
+	{
+		m_vMax = FMath::Clamp(m_vMax*1.2f, 1.0f, 2.0f*m_vMaxDef);
+		m_target = m_myPack->m_desiredPrey->wander();
+		f = seek();
+		//UE_LOG(LogTemp, Warning, TEXT("Pursue!"));
+
+		break;
+	}
+	case EBoidStatus::REGROUP:
+	{
+		m_target = regroup();
+		f = 2.0f * seek();
+		//UE_LOG(LogTemp, Warning, TEXT("REGROUP!"));
+
+		break;
+	}
+	default:
+		break;
+	}
+	return f;
+}
+
+FVector APredatorBoid::tacticalBehaviour(const FVector & _f)
+{
+	//m_vMax = 3.0f*m_vMaxDef;
+	FVector targetP;
+	//GetWorld()->GetTimerManager().PauseTimer(m_myPack->m_targetPack->m_threatTimer);
+	targetP = m_myPack->m_targetPack->m_packPos;
+	//GetWorld()->GetTimerManager().UnPauseTimer(m_myPack->m_targetPack->m_threatTimer);
+
+	float dist = FVector::Dist(m_pos, targetP);
+	bool isFar = dist - m_myPack->m_spawnRad - m_myPack->m_targetPack->m_spawnRad >=  m_collisionRad;
+	if(isFar)
+	{
+		m_v = m_myPack->m_targetPack->m_packPos - m_pos;
+		m_target = wander();
+	}
+	else if(!isFar && !m_readyToHunt)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("FORMATION!"));
+
+		performRole(targetP);
+	}
+	
+	
+	return seek();
+}
+
+void APredatorBoid::performRole(const FVector &_target)
+{
+	FVector front = m_myPack->m_pack[0]->m_pos - _target;
+	FVector dir;
+	FVector flankPos;
+	
+	//UE_LOG(LogTemp, Warning, TEXT("FORMATION! Role: %d"), (int)m_role);
+	switch (m_role)
+	{
+	case EHuntRole::FRONT:
+	{
+		m_vMax = 0.7f*m_vMaxDef;
+		flankPos = _target;
+		m_readyToHunt = true;
+		break;
+	}
+	case EHuntRole::LFLANK:
+	{
+		flankPos = _target + front * FRotator(0.0f, -90.0f, 0.0f).Vector();
+		
+		dir = front.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
+		//flankPos = _target + m_myPack->m_targetPack->m_spawnRad * dir;
+		m_vMax = 1.5f*m_vMaxDef;
+		break;
+	}
+	case EHuntRole::RFLANK:
+	{
+		flankPos = _target + front * FRotator(0.0f, 90.0f, 0.0f).Vector();
+
+		//UE_LOG(LogTemp, Warning, TEXT("getting desired prey"));
+		dir = front.RotateAngleAxis(90.0f, FVector(0.0f, 0.0f, 1.0f));
+		//flankPos = _target + m_myPack->m_targetPack->m_spawnRad * dir;
+		m_vMax = 1.5f*m_vMaxDef;
+		break;
+	}
+	default:
+		break;
+	}
+
+	m_v = dir - front;
+	m_target = flankPos;
+
+
+}
+
+
 
 // Called every frame
 void APredatorBoid::Tick(float DeltaTime)

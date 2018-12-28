@@ -21,7 +21,7 @@ ABoid::ABoid()
 	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootScene"));
 	m_collision = sphereComponent;
 	RootComponent = m_collision;
-	m_collisionRad = 200.0f;
+	//m_collisionRad = 1000.0f;
 	sphereComponent->InitSphereRadius(m_collisionRad);
 	m_collision->bHiddenInGame = false;
 
@@ -79,6 +79,8 @@ void ABoid::handleStatus()
 }
 
 
+
+
 /// delegate functions
 void ABoid::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult)
 {
@@ -86,7 +88,7 @@ void ABoid::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponent, A
 	if(intruder!=nullptr)
 	{
 		m_neighbours.Add(intruder);
-		handleStatus();
+
 		//UE_LOG(LogTemp, Warning, TEXT("+1 Intruder Boid: %d boids in"),m_neighbours.Num());
 	}
 }
@@ -98,7 +100,6 @@ void ABoid::onEndPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AAc
 		if(m_neighbours[i]==_otherActor)
 		{
 			m_neighbours.RemoveAt(i);
-			handleStatus();
 			//UE_LOG(LogTemp, Warning, TEXT("-1 Intruder Boid: %d boids in"), m_neighbours.Num());
 			return;
 		}
@@ -144,6 +145,33 @@ TArray<int> ABoid::searchPredator() const
 	return out;
 }
 
+TArray<ABoid*> ABoid::getPredator() const
+{
+	TArray<ABoid*> out;
+	for (int i = 0; i < m_neighbours.Num(); ++i)
+	{
+		if (m_neighbours[i]->m_type == EBoidType::PREDATOR)
+		{
+			out.Add(m_neighbours[i]);
+		}
+	}
+
+	return out;
+}
+TArray<ABoid*> ABoid::getPrey() const
+{
+	TArray<ABoid*> out;
+	for (int i = 0; i < m_neighbours.Num(); ++i)
+	{
+		if (m_neighbours[i]->m_type == EBoidType::PREY)
+		{
+			out.Add(m_neighbours[i]);
+		}
+	}
+
+	return out;
+}
+
 void ABoid::printDebug(const FColor &_c)const
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Draw"));
@@ -163,7 +191,22 @@ void ABoid::printDebug(const FColor &_c)const
 /// Steering Behaviors For Autonomous Characters
 /// by Craig W.Reynolds, presented on GDC1999
 
-
+void ABoid::resolve(const FVector &_f)
+{
+	
+	FVector desiredV = m_target - m_pos;
+	FVector outV = desiredV.GetSafeNormal();
+	FVector accel = _f * m_invMass;
+	FVector oldV = m_v + accel;
+	
+	m_v = ClampVector(oldV, FVector(-m_vMax, -m_vMax, 0.0f), FVector(m_vMax, m_vMax, 0.0f));
+	
+	m_pos += m_v;
+	/// Update visuals
+	m_mesh->SetWorldLocation(m_pos);
+	RootComponent->SetWorldLocation(m_pos);
+	//
+}
 
 
 /// Seek a position to steer towards
@@ -186,13 +229,17 @@ FVector ABoid::seek() const
 	return desiredV;
 }
 
-FVector ABoid::flee() const
+FVector ABoid::flee()
 {
 	/// steer away from the seeking position
+	
 	FVector out = -seek();
+	
 	out.Z = 0.0f;
 	return -seek();
 }
+
+
 
 FVector ABoid::pursue(const FVector &_futureP) const
 {
@@ -214,28 +261,42 @@ FVector ABoid::wander() const
 	
 	return randPos;
 }
+/// same with wander but gets reverse positions
+FVector ABoid::turnBack() const
+{
+	FVector future = m_pos - 10.0f * m_v;
+	FVector randRot = FRotator(0.0f, FMath::RandRange(-180.0f, 180.0f), 0.0f).Vector();
+	FVector randPos = future + 5.0f * randRot;
+
+	return randPos;
+}
 
 FVector ABoid::separate()
 {
-	float comfortDist = 0.1f * m_collisionRad;
+	float comfortDist = 10.0f*m_collisionRad;
 	FVector newV;
 	if (m_neighbours.Num() > 0) 
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("separate"));
+
 		for (int i = 0; i < m_neighbours.Num(); ++i)
 		{
 			float dist = FVector::Dist(m_pos, m_neighbours[i]->m_pos);
-			if (dist > 0 && dist < comfortDist)
+			if (dist < comfortDist)
 			{
-				FVector diffV = (m_pos - m_neighbours[i]->m_pos).GetSafeNormal();
+				//UE_LOG(LogTemp, Warning, TEXT("too close"));
+				FVector diffV = (m_pos - m_neighbours[i]->m_pos );
 				diffV /= dist;
 				newV += diffV;
 			}
 		}
-		newV = (newV / m_neighbours.Num()).GetSafeNormal();
+		newV = (newV / m_neighbours.Num());
+		m_vMax = 1.5f*m_vMaxDef;
 		return FVector(newV.X, newV.Y, 0.0f);
 	
 	}
-	return m_v;
+	m_vMax = 1.0f*m_vMaxDef;
+	return FVector(0.0f);
 }
 
 FVector ABoid::cohesion(const EBoidType &_t)
