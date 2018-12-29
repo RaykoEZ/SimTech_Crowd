@@ -15,10 +15,10 @@ APredatorBoid::APredatorBoid()
 	m_readyToHunt = false;
 	m_collisionRad = 500.0f;
 	m_collision->InitSphereRadius(m_collisionRad);
-
+	
 }
 
-APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
+APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax, const EHuntRole &_role)
 {
 	APredatorBoid* out = NewObject<APredatorBoid>();
 	out->m_pos = _pos;
@@ -27,15 +27,34 @@ APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector
 	out->m_vMaxDef = _vMax;
 	out->m_fMax = _fMax;
 	out->m_myPack = _p;
-
+	out->m_role = _role;
+	
+	
+	//UE_LOG(LogTemp, Warning, TEXT("flank angle : (%f)"), out->m_flankAngle);
 	return out;
 }
+
+void APredatorBoid::setFlank()
+{
+	if (m_role == EHuntRole::LFLANK)
+	{
+		m_flankAngle = m_rng.FRandRange(-120.0f, -80.0f);
+		m_rng.GenerateNewSeed();
+	}
+	else if (m_role == EHuntRole::RFLANK)
+	{
+		m_flankAngle = m_rng.FRandRange(80.0f, 120.0f);
+		m_rng.GenerateNewSeed();
+
+	}
+}
+
+
 
 // Called when the game starts or when spawned
 void APredatorBoid::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 }
 
@@ -52,7 +71,9 @@ void APredatorBoid::update(const float &_dt)
 		//UE_LOG(LogTemp, Warning, TEXT("HUNT!"));
 
 		handleStatus();
+		onEnterRange();
 		f = genericBehaviour(f);
+
 	}
 	else
 	{
@@ -106,6 +127,25 @@ void APredatorBoid::handleStatus()
 	}
 }
 
+void APredatorBoid::onEnterRange()
+{
+	TArray<ABoid*> prey = getPrey();
+	if(prey.Num()> 0)
+	{
+		for(int i=0 ; i<prey.Num();++i)
+		{
+			if(Cast<APreyBoid>(prey[i]) == m_myPack->m_desiredPrey)
+			{
+				/// bite or somthing
+				m_myPack->m_desiredPrey->takeDamage(0.05f*m_vMaxDef);
+			}
+		
+		}
+	}
+
+}
+
+
 
 
 FVector APredatorBoid::regroup()
@@ -156,7 +196,7 @@ FVector APredatorBoid::genericBehaviour(const FVector &_f)
 	}
 	case EBoidStatus::PURSUING:
 	{
-		m_vMax = FMath::Clamp(m_vMax*1.2f, 1.0f, 2.0f*m_vMaxDef);
+		m_vMax = FMath::Clamp(m_vMax*1.1f, 1.0f, 2.0f*m_vMaxDef);
 		m_target = m_myPack->m_desiredPrey->wander();
 		f = seek();
 		//UE_LOG(LogTemp, Warning, TEXT("Pursue!"));
@@ -181,68 +221,83 @@ FVector APredatorBoid::tacticalBehaviour(const FVector & _f)
 {
 	//m_vMax = 3.0f*m_vMaxDef;
 	FVector targetP;
-	//GetWorld()->GetTimerManager().PauseTimer(m_myPack->m_targetPack->m_threatTimer);
+	
 	targetP = m_myPack->m_targetPack->m_packPos;
-	//GetWorld()->GetTimerManager().UnPauseTimer(m_myPack->m_targetPack->m_threatTimer);
-
+	/// Vector from the predator pack centre to the prey herd centre
+	FVector front = m_myPack->m_pack[0]->m_pos - targetP;
 	float dist = FVector::Dist(m_pos, targetP);
 	bool isFar = dist - m_myPack->m_spawnRad - m_myPack->m_targetPack->m_spawnRad >=  m_collisionRad;
-	if(isFar)
+	
+	if(isFar && m_role == EHuntRole::FRONT)
 	{
-		m_v = m_myPack->m_targetPack->m_packPos - m_pos;
+		m_vMax = 0.4f*m_vMaxDef;
+		FVector randRotF = FRotator(0.0f, m_rng.FRandRange(-10.0f, 10.0f), 0.0f).Vector();
+		
+		FVector flankPos = front * randRotF;
+		m_readyToHunt = true;
+
+
+		//UE_LOG(LogTemp, Warning, TEXT("DONE"));
+
+		m_v = (m_myPack->m_targetPack->m_packPos - m_pos) * randRotF;
 		m_target = wander();
 	}
 	else if(!isFar && !m_readyToHunt)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("FORMATION!"));
 
-		performRole(targetP);
+		performRole(targetP, front);
 	}
 	
 	
 	return seek();
 }
 
-void APredatorBoid::performRole(const FVector &_target)
+void APredatorBoid::performRole(const FVector &_target, const FVector &_frontDir)
 {
-	FVector front = m_myPack->m_pack[0]->m_pos - _target;
+	
 	FVector dir;
 	FVector flankPos;
-	
-	//UE_LOG(LogTemp, Warning, TEXT("FORMATION! Role: %d"), (int)m_role);
 	switch (m_role)
 	{
-	case EHuntRole::FRONT:
-	{
-		m_vMax = 0.7f*m_vMaxDef;
-		flankPos = _target;
-		m_readyToHunt = true;
-		break;
-	}
 	case EHuntRole::LFLANK:
 	{
-		flankPos = _target + front * FRotator(0.0f, -90.0f, 0.0f).Vector();
 		
-		dir = front.RotateAngleAxis(-90.0f, FVector(0.0f, 0.0f, 1.0f));
+		
+		FVector randRotL = FRotator(0.0f, m_flankAngle, 0.0f).Vector();
+
+		//UE_LOG(LogTemp, Warning, TEXT("randL : (%f)"), m_flankAngle);
+
+		flankPos = _target + _frontDir * randRotL;
+		//m_rng.GenerateNewSeed();
+		dir = _frontDir.RotateAngleAxis(randRotL.Y, FVector(0.0f, 0.0f, 1.0f));
 		//flankPos = _target + m_myPack->m_targetPack->m_spawnRad * dir;
 		m_vMax = 1.5f*m_vMaxDef;
+		
+		
 		break;
 	}
 	case EHuntRole::RFLANK:
 	{
-		flankPos = _target + front * FRotator(0.0f, 90.0f, 0.0f).Vector();
+		
+		
+		FVector randRotR = FRotator(0.0f, m_flankAngle, 0.0f).Vector();
+		//UE_LOG(LogTemp, Warning, TEXT("randR : (%f)"), r);
+
+		flankPos = _target + _frontDir * randRotR;
 
 		//UE_LOG(LogTemp, Warning, TEXT("getting desired prey"));
-		dir = front.RotateAngleAxis(90.0f, FVector(0.0f, 0.0f, 1.0f));
+		dir = _frontDir.RotateAngleAxis(randRotR.Y, FVector(0.0f, 0.0f, 1.0f));
 		//flankPos = _target + m_myPack->m_targetPack->m_spawnRad * dir;
 		m_vMax = 1.5f*m_vMaxDef;
+		
 		break;
 	}
 	default:
 		break;
 	}
 
-	m_v = dir - front;
+	m_v = dir - _frontDir;
 	m_target = flankPos;
 
 

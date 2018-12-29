@@ -65,6 +65,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+	FRandomStream m_rng;
 	
 };

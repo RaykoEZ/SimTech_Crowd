@@ -28,7 +28,8 @@ APreyPack::APreyPack()
 	RootComponent->bVisible = true;
 	RootComponent->bHiddenInGame = false;
 
-
+	int32 seed = FMath::Rand();
+	m_rng.Initialize(seed);
 }
 
 // Called when the game starts or when spawned
@@ -46,7 +47,7 @@ void APreyPack::init()
 	auto world = GetWorld();
 	for (int i = 0; i < m_numMember; ++i)
 	{
-		FVector pos = m_spawnCentre + FVector(FMath::RandRange(-m_spawnRad, m_spawnRad), FMath::RandRange(-m_spawnRad, m_spawnRad), 0.0f);
+		FVector pos = m_spawnCentre + FVector(m_rng.FRandRange(-m_spawnRad, m_spawnRad), m_rng.FRandRange(-m_spawnRad, m_spawnRad), 0.0f);
 		FVector v = FVector(0.0f, 0.0f, 0.0f);
 		//UE_LOG(LogTemp, Warning, TEXT("pos gen : (%f , %f, %f)"), pos.X, pos.Y, pos.Z);
 		/// Spawning a boid
@@ -110,14 +111,14 @@ void APreyPack::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponen
 
 void APreyPack::onEndPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex)
 {
-	APredatorPack* intruder = Cast<APredatorPack>(_otherActor);
-	
+	//APredatorPack* intruder = Cast<APredatorPack>(_otherActor);
+	/*
 	if (intruder != nullptr)
 	{
 
-		m_packState = EHerdStatus::NERVOUS;
+		//m_packState = EHerdStatus::NERVOUS;
 		UE_LOG(LogTemp, Warning, TEXT("Predator exiting herd"));
-	}
+	}*/
 }
 
 // Called every frame

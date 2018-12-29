@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/Components/SphereComponent.h"
+#include "Runtime/Core/Public/Math/RandomStream.h"
 #include "Boid.generated.h"
 
 
@@ -43,7 +44,7 @@ public:
 	virtual void update(const float &_dt);
 	/// determine and change boid status for this boid
 	virtual void handleStatus();
-
+	virtual void onEnterRange();
 	FVector seek() const;
 	FVector flee();
 	void resolve(const FVector &_f);
@@ -101,7 +102,7 @@ public:
 	EBoidType getType() const { return m_type; }
 	UFUNCTION()
 	void setTarget(const FVector &_pos) { m_target = _pos; }
-
+	
 	UPROPERTY()
 	int m_id;
 	/// for a = f/m, 1/m pre-calculated
@@ -145,4 +146,6 @@ public:
 
 	UPROPERTY()
 	bool m_isOutOfBound;
+
+	FRandomStream m_rng;
 };

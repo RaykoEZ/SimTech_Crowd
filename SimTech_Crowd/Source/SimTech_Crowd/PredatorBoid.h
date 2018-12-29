@@ -27,7 +27,9 @@ public:
 	// Sets default values for this actor's properties
 	APredatorBoid();
 	EHuntRole m_role;
+	float m_flankAngle;
 	bool m_readyToHunt;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,17 +41,18 @@ protected:
 	APredatorPack* m_myPack;
 	FVector genericBehaviour(const FVector &_f);
 	FVector tacticalBehaviour(const FVector &_f);
-	void performRole(const FVector &_target);
+	void performRole(const FVector &_target, const FVector &_frontDir);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	static APredatorBoid* build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
-
+	static APredatorBoid* build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax, const EHuntRole &_role);
+	void setFlank();
 	virtual void update(const float &_dt) override;
 	virtual void handleStatus() override;
-
+	virtual void onEnterRange() override;
+	
 
 
 	

@@ -13,7 +13,7 @@ APreyBoid::APreyBoid()
 	m_type = EBoidType::PREY;
 	//UE_LOG(LogTemp, Warning, TEXT("invmass: %f"),m_invMass);
 	m_status = EBoidStatus::WANDERING;
-	m_collisionRad = 1000.0f;
+	m_collisionRad = 1500.0f;
 	m_collision->InitSphereRadius(m_collisionRad);
 
 }
@@ -51,46 +51,8 @@ void APreyBoid::update(const float &_dt)
 	//ABoid::update(_dt);
 	//printDebug();
 	handleStatus();
-	switch (m_status)
-	{
-		case EBoidStatus::IDLE:
-		{
-			f = FVector(0.0f);
-			m_v = FVector(0.0f);
-			break;
-		}	
-		case EBoidStatus::WANDERING:
-		{
-			m_vMax = 0.8f*m_vMaxDef;
-			
-			//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
-
-			m_target = wander();
-			f = seek();
-
-			break;
-		}
-		case EBoidStatus::FLEEING:
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Flee!"));
-
-			m_vMax = FMath::Clamp(m_vMax*1.05f, 1.0f, 1.5f*m_vMaxDef);
-			/// flee from the general direction of the predators
-			m_target = m_myPack->m_threatPos;
-			f = flee();
-			break;
-		}
-		case EBoidStatus::REGROUP:
-		{
-			m_target = regroup();
-			f = 2.0f * seek();
-			//UE_LOG(LogTemp, Warning, TEXT("REGROUP!"));
-
-			break;
-		}
-		default:
-			break;
-	}
+	onEnterRange();
+	f = genericBehaviour(f);
 	resolve(f);
 	printDebug(FColor(0.0f, 255.0f, 0.0f));
 	
@@ -100,9 +62,9 @@ void APreyBoid::update(const float &_dt)
 void APreyBoid::handleStatus()
 {
 	/// Predators lost preys
-	float dist = FVector::Dist(m_pos, m_myPack->m_pack[0]->m_pos);
+	float dist = FVector::Dist(m_pos, m_myPack->m_packPos);
 	float distO = FVector::Dist(m_pos, FVector(0.0f));
-	if (dist > 2.0f * m_myPack->m_spawnRad || distO > m_myPack->m_worldRad)
+	if (dist > 1.1f * m_myPack->m_spawnRad || distO > m_myPack->m_worldRad)
 	{
 		m_isOutOfBound = true;
 	}
@@ -117,12 +79,16 @@ void APreyBoid::handleStatus()
 
 		return;
 	}
-
-	
-	if( m_myPack->m_packState == EHerdStatus::PANIC)
+	else if( m_myPack->m_packState == EHerdStatus::PANIC)
 	{
 
 		m_status = EBoidStatus::FLEEING;
+	}
+	else if (m_vMax == 0.0f)
+	{
+		m_status = EBoidStatus::IDLE;
+		
+
 	}
 	else 
 	{
@@ -133,6 +99,76 @@ void APreyBoid::handleStatus()
 
 
 
+void APreyBoid::onEnterRange()
+{
+	TArray<ABoid*> predator = getPredator();
+	if (predator.Num() > 0 && m_status != EBoidStatus::IDLE)
+	{
+		m_status = EBoidStatus::FLEEING;
+	}
+}
+
+FVector APreyBoid::genericBehaviour(const FVector & _f)
+{
+	FVector f = _f;
+	switch (m_status)
+	{
+	case EBoidStatus::IDLE:
+	{
+		f = FVector(0.0f);
+		
+		break;
+	}
+	case EBoidStatus::WANDERING:
+	{
+		m_vMax = 0.8f*m_vMaxDef;
+
+		//UE_LOG(LogTemp, Warning, TEXT("Wandering!"));
+
+		m_target = wander();
+		f = seek();
+
+		break;
+	}
+	case EBoidStatus::FLEEING:
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Flee!"));
+
+		m_vMax = FMath::Clamp(m_vMax*1.1f, 1.0f, 1.5f*m_vMaxDef);
+		/// flee from the general direction of the predators
+		m_target = -m_myPack->m_threatPos;
+		f = flee();
+		break;
+	}
+	case EBoidStatus::REGROUP:
+	{
+		m_target = regroup();
+		f = 2.0f * seek();
+		//UE_LOG(LogTemp, Warning, TEXT("REGROUP!"));
+
+		break;
+	}
+	default:
+		break;
+	}
+	return f;
+}
+
+
+void APreyBoid::takeDamage(const float &_f)
+{
+	if (m_vMax > 0.0f)
+	{
+		m_vMax = FMath::Clamp(m_vMax -   _f, 0.0f, m_vMaxDef);
+		
+		
+	}
+	if(m_v.Size()>0.0f)
+	{
+		m_v = FVector(FMath::Clamp(m_v.X - _f, 0.0f, m_vMaxDef), FMath::Clamp(m_v.Y - 0.1f*_f, 0.0f, m_vMaxDef), 0.0f);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Dying!?"));
+}
 
 
 FVector APreyBoid::regroup()

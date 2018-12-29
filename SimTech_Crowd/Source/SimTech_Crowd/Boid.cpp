@@ -38,6 +38,9 @@ ABoid::ABoid()
 	
 	m_isOutOfBound = false;
 
+	int32 seed = FMath::Rand();
+	m_rng.Initialize(seed);
+
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +78,10 @@ void ABoid::update(const float &_dt)
 }
 
 void ABoid::handleStatus()
+{
+}
+
+void ABoid::onEnterRange()
 {
 }
 
@@ -116,6 +123,7 @@ void ABoid::Tick(float DeltaTime)
 	update(DeltaTime);
 	
 }
+
 
 TArray<int> ABoid::searchPrey() const
 {

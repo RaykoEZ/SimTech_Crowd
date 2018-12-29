@@ -21,7 +21,9 @@ public:
 	static APreyBoid* build(UWorld* _w,APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax);
 	virtual void update(const float &_dt) override;
 	virtual void handleStatus() override;
-
+	virtual void onEnterRange() override;
+	FVector genericBehaviour(const FVector &_f);
+	void takeDamage(const float &_f);
 
 protected:
 	// Called when the game starts or when spawned

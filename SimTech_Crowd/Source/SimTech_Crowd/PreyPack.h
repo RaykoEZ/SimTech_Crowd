@@ -86,5 +86,5 @@ public:
 	void onThreatTimerUpdate();
 	FTimerHandle m_threatTimer;
 	
-	
+	FRandomStream m_rng;
 };
