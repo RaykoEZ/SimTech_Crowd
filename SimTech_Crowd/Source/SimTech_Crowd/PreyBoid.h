@@ -31,8 +31,6 @@ protected:
 	
 	UFUNCTION()
 	FVector regroup();
-	UFUNCTION()
-	FVector evade() const;
 
 	/// Pointer to the pack this boid belonggs to
 	UPROPERTY()

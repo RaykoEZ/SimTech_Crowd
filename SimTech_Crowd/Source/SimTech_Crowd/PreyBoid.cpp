@@ -191,12 +191,6 @@ FVector APreyBoid::regroup()
 	return wander();;
 }
 
-FVector APreyBoid::evade() const
-{
-	return FVector();
-}
-
-
 
 // Called every frame
 void APreyBoid::Tick(float DeltaTime)

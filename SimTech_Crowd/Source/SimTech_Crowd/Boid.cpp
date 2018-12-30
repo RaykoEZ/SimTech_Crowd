@@ -195,7 +195,7 @@ void ABoid::printDebug(const FColor &_c)const
 //------------------------------------------------------------------------
 
 
-/// Implementations are based on this paper :
+/// Implementations from ideas based on this paper :
 /// Steering Behaviors For Autonomous Characters
 /// by Craig W.Reynolds, presented on GDC1999
 
