@@ -30,7 +30,7 @@ ABoid::ABoid()
 	// these two are called when 1 or more actors enter/exit the sphere region
 	m_collision->OnComponentBeginOverlap.AddDynamic(this, &ABoid::onBeginPresenceOverlap);
 	m_collision->OnComponentEndOverlap.AddDynamic(this, &ABoid::onEndPresenceOverlap);
-
+	m_collision->ShapeColor = FColor(255.0f, 255.0f, 255.0f);
 
 	m_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Test Boid Mesh"));
 	//Mobility
@@ -188,7 +188,7 @@ void ABoid::printDebug(const FColor &_c)const
 		FVector(m_pos + 120 * m_v),
 		_c,
 		false, 0.1f, 0,
-		30.0f);
+		120.0f);
 
 }
 
@@ -241,10 +241,21 @@ FVector ABoid::flee()
 {
 	/// steer away from the seeking position
 	
-	FVector out = -seek();
-	
-	out.Z = 0.0f;
-	return -seek();
+	FVector desiredV =  m_pos - m_target;
+	FVector outV = desiredV.GetSafeNormal();
+	if (!FMath::IsNearlyEqual(outV.Size(), 100.0f))
+	{
+
+		outV *= m_vMax;
+		outV -= m_v;
+
+		outV.Z = 0.0f;
+		// Draw direction line for debug
+
+		return outV;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("boid reached target"));
+	return -m_v;
 }
 
 
@@ -307,24 +318,20 @@ FVector ABoid::separate()
 	return FVector(0.0f);
 }
 
-FVector ABoid::cohesion(const EBoidType &_t)
+FVector ABoid::getAverageNeighbourPos(const EBoidType &_t)
 {
 	TArray<int> idx;
-	FVector newP;
-	switch (_t)
-	{
-	case EBoidType::PREDATOR:
+	FVector newP = FVector(0.0f);
+
+	if (_t == EBoidType::PREDATOR)
 	{
 		idx = searchPredator();
-		break;
+
 	}
-	case EBoidType::PREY:
+	else
 	{
 		idx = searchPrey();
-		break;
-	}
-	default:
-		break;
+
 	}
 
 	if (idx.Num() > 0)
@@ -346,7 +353,7 @@ FVector ABoid::cohesion(const EBoidType &_t)
 FVector ABoid::alignment()
 {
 	TArray<int> idx;
-	FVector newV;
+	FVector newV = FVector(0.0f);
 	if (idx.Num() < 0)
 	{
 		switch (m_type)

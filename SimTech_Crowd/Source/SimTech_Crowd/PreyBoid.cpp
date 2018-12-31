@@ -14,8 +14,10 @@ APreyBoid::APreyBoid()
 	//UE_LOG(LogTemp, Warning, TEXT("invmass: %f"),m_invMass);
 	m_status = EBoidStatus::WANDERING;
 	m_collisionRad = 1500.0f;
+	m_collisionRadDef = m_collisionRad;
 	m_collision->InitSphereRadius(m_collisionRad);
-
+	m_isHurt = false;
+	m_numThreat = 0;
 }
 
 APreyBoid* APreyBoid::build(UWorld* _w, APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
@@ -52,7 +54,17 @@ void APreyBoid::update(const float &_dt)
 	//printDebug();
 	handleStatus();
 	onEnterRange();
-	f = genericBehaviour(f);
+	if(m_isHurt && _dt > 45.0f)
+	{
+		FVector f0 = genericBehaviour(f);
+		//float n = searchPredator().Num();
+		f = FVector(FMath::Clamp(0.0f,m_fMax, f0.X - (m_fMax/_dt*_dt)),
+			FMath::Clamp(0.0f, m_fMax, f0.Y - (m_fMax /_dt*_dt)),0.0f);
+	}
+	else
+	{
+		f = genericBehaviour(f);
+	}
 	resolve(f);
 	printDebug(FColor(0.0f, 255.0f, 0.0f));
 	
@@ -64,7 +76,7 @@ void APreyBoid::handleStatus()
 	/// Predators lost preys
 	float dist = FVector::Dist(m_pos, m_myPack->m_packPos);
 	float distO = FVector::Dist(m_pos, FVector(0.0f));
-	if (dist > 1.1f * m_myPack->m_spawnRad || distO > m_myPack->m_worldRad)
+	if (dist > m_myPack->m_spawnRad || distO > m_myPack->m_worldRad)
 	{
 		m_isOutOfBound = true;
 	}
@@ -133,10 +145,20 @@ FVector APreyBoid::genericBehaviour(const FVector & _f)
 	case EBoidStatus::FLEEING:
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Flee!"));
-
 		m_vMax = FMath::Clamp(m_vMax*1.1f, 1.0f, 1.5f*m_vMaxDef);
 		/// flee from the general direction of the predators
-		m_target = -m_myPack->m_threatPos;
+		
+		
+		if(m_numThreat > 0)
+		{
+			m_target = m_threatPos;
+			//UE_LOG(LogTemp, Warning, TEXT("m_target Prey : (%f , %f, %f)"), m_threatPos.X, m_threatPos.Y, m_threatPos.Z);
+
+		}
+		else 
+		{
+			m_target = getAverageNeighbourPos(EBoidType::PREDATOR);
+		}
 		f = flee();
 		break;
 	}
@@ -165,9 +187,12 @@ void APreyBoid::takeDamage(const float &_f)
 	}
 	if(m_v.Size()>0.0f)
 	{
-		m_v = FVector(FMath::Clamp(m_v.X - _f, 0.0f, m_vMaxDef), FMath::Clamp(m_v.Y - 0.1f*_f, 0.0f, m_vMaxDef), 0.0f);
+		m_v = FVector(FMath::Clamp(m_v.X - _f, 0.0f, m_vMaxDef), FMath::Clamp(m_v.Y - _f, 0.0f, m_vMaxDef), 0.0f);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Dying!?"));
+
+	m_isHurt = true;
+
+	//UE_LOG(LogTemp, Warning, TEXT("Dying!?"));
 }
 
 
@@ -188,7 +213,7 @@ FVector APreyBoid::regroup()
 	}
 	m_vMax = m_vMaxDef;
 	m_v = -m_pos.GetSafeNormal();
-	return wander();;
+	return wander();
 }
 
 

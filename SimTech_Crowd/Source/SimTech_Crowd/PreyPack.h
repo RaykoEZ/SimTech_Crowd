@@ -50,8 +50,7 @@ public:
 	UPROPERTY()
 	TArray<APredatorBoid*> m_threatSite;
 	/// average position of the threats
-	UPROPERTY()
-	FVector m_threatPos;
+
 	UPROPERTY()
 	EHerdStatus m_packState;
 

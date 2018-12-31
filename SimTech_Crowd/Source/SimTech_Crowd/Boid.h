@@ -58,7 +58,7 @@ public:
 	/// Returns direction vector facing away from the average neighbourhood
 	FVector separate(); ///d
 	/// Returns a target vector to steer the boid towards to approach a neighbourhood
-	FVector cohesion(const EBoidType &_t); ///d
+	FVector getAverageNeighbourPos(const EBoidType &_t); ///d
 	FVector alignment(); ///d
 
 protected:
@@ -143,7 +143,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float m_collisionRad;
-
+	float m_collisionRadDef;
 	UPROPERTY()
 	bool m_isOutOfBound;
 

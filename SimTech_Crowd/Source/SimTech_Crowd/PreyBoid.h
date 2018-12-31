@@ -32,13 +32,19 @@ protected:
 	UFUNCTION()
 	FVector regroup();
 
+	bool m_isHurt;
 	/// Pointer to the pack this boid belonggs to
+
 	UPROPERTY()
 	APreyPack* m_myPack;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UPROPERTY()
+	int m_numThreat;
 
+	UPROPERTY()
+	FVector m_threatPos;
 
 	
 };

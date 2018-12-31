@@ -55,7 +55,7 @@ void APredatorPack::init()
 		/// Spawning a boid
 
 		/// Get a boid initialized
-		APredatorBoid* predator = APredatorBoid::build(world, this, pos, v, FMath::FRandRange(2.0f, 3.0f), 1.0f, role);
+		APredatorBoid* predator = APredatorBoid::build(world, this, pos, v, FMath::FRandRange(2.5f, 3.0f), 1.0f, role);
 		predator->m_id = (int)i;
 
 		/// Set this boid as a template for spawning
@@ -100,19 +100,7 @@ APreyBoid* APredatorPack::getDesiredPrey() const
 
 void APredatorPack::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult)
 {
-	/*
-	APreyBoid* intruder = Cast<APreyBoid>(_otherActor);
-	if (intruder != nullptr)
-	{
-		m_targetPrey.Add(intruder);
-	}
-	if(m_huntStatus == EPackStatus::HUNTING)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("getting desired prey"));
-
-		m_desiredPreyIdx = getDesiredPrey();
-
-	}*/
+	
 }
 
 void APredatorPack::onEndPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex)

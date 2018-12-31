@@ -15,7 +15,7 @@ APredatorBoid::APredatorBoid()
 	m_readyToHunt = false;
 	m_collisionRad = 500.0f;
 	m_collision->InitSphereRadius(m_collisionRad);
-	
+	m_collisionRadDef = m_collisionRad;
 }
 
 APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax, const EHuntRole &_role)
@@ -38,12 +38,12 @@ void APredatorBoid::setFlank()
 {
 	if (m_role == EHuntRole::LFLANK)
 	{
-		m_flankAngle = m_rng.FRandRange(-120.0f, -80.0f);
+		m_flankAngle = m_rng.FRandRange(-120.0f, -90.0f);
 		m_rng.GenerateNewSeed();
 	}
 	else if (m_role == EHuntRole::RFLANK)
 	{
-		m_flankAngle = m_rng.FRandRange(80.0f, 120.0f);
+		m_flankAngle = m_rng.FRandRange(90.0f, 120.0f);
 		m_rng.GenerateNewSeed();
 
 	}
@@ -230,7 +230,7 @@ FVector APredatorBoid::tacticalBehaviour(const FVector & _f)
 	
 	if(isFar && m_role == EHuntRole::FRONT)
 	{
-		m_vMax = 0.4f*m_vMaxDef;
+		m_vMax = 0.5f*m_vMaxDef;
 		FVector randRotF = FRotator(0.0f, m_rng.FRandRange(-10.0f, 10.0f), 0.0f).Vector();
 		
 		FVector flankPos = front * randRotF;
