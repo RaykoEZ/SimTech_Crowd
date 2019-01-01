@@ -30,3 +30,8 @@ ___
 #### Now we have both references of the pack in the level blueprint
 - In the level blueprint, after the Possess node in the BeginPlay event, drag out the InitSim node from the SimWorld reference and insert your Pack Reference into the correct pins.
 - Remove the above modification or duplicate the level to switch to auto-generate.
+
+### Building the source
+___
+- You can choose to click Compile in the UE4 editor
+- Or right-click+click Build on the SimTech_Crowd project root in the class/directory outliner in Visual Studio. 
