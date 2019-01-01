@@ -18,12 +18,7 @@ APredatorPack::APredatorPack()
 	USphereComponent* sphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootScene"));
 
 	m_packBound = sphereComponent;
-	//m_bound->AttachTo(RootComponent);
 	sphereComponent->SetSphereRadius(m_spawnRad);
-
-
-	m_packBound->OnComponentBeginOverlap.AddDynamic(this, &APredatorPack::onBeginPresenceOverlap);
-	m_packBound->OnComponentEndOverlap.AddDynamic(this, &APredatorPack::onEndPresenceOverlap);
 
 	RootComponent = m_packBound;
 	RootComponent->bVisible = true;
@@ -55,7 +50,7 @@ void APredatorPack::init()
 		/// Spawning a boid
 
 		/// Get a boid initialized
-		APredatorBoid* predator = APredatorBoid::build(world, this, pos, v, FMath::FRandRange(2.5f, 3.0f), 1.0f, role);
+		APredatorBoid* predator = APredatorBoid::build(10.0f, this, pos, v, FMath::FRandRange(2.5f, 3.0f), 1.0f, role);
 		predator->m_id = (int)i;
 
 		/// Set this boid as a template for spawning
@@ -97,16 +92,6 @@ APreyBoid* APredatorPack::getDesiredPrey() const
 }
 
 
-
-void APredatorPack::onBeginPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult)
-{
-	
-}
-
-void APredatorPack::onEndPresenceOverlap(UPrimitiveComponent * _overlappedComponent, AActor * _otherActor, UPrimitiveComponent * _otherComp, int32 _otherBodyIndex)
-{
-
-}
 
 // Called every frame
 void APredatorPack::Tick(float DeltaTime)

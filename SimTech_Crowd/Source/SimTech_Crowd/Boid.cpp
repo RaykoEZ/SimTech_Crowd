@@ -47,7 +47,7 @@ ABoid::ABoid()
 void ABoid::BeginPlay()
 {
 	Super::BeginPlay();
-	m_invMass = 1.0f / m_mass;
+	//m_invMass = 1.0f / m_mass;
 	//UE_LOG(LogTemp, Warning, TEXT("m_pos : (%f , %f, %f)"), m_pos.X, m_pos.Y, m_pos.Z);
 	//UE_LOG(LogTemp, Warning, TEXT("RootLoc : (%f , %f, %f)"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 }
@@ -260,17 +260,6 @@ FVector ABoid::flee()
 
 
 
-FVector ABoid::pursue(const FVector &_futureP) const
-{
-	FVector desiredV = m_pos - _futureP;
-
-	FVector outV = desiredV.GetSafeNormal();
-
-	outV *= m_vMax;
-	outV -= m_v;
-	return outV;
-}
-
 FVector ABoid::wander() const
 {
 	
@@ -279,43 +268,6 @@ FVector ABoid::wander() const
 	FVector randPos = future + 5.0f * randRot;
 	
 	return randPos;
-}
-/// same with wander but gets reverse positions
-FVector ABoid::turnBack() const
-{
-	FVector future = m_pos - 10.0f * m_v;
-	FVector randRot = FRotator(0.0f, FMath::RandRange(-180.0f, 180.0f), 0.0f).Vector();
-	FVector randPos = future + 5.0f * randRot;
-
-	return randPos;
-}
-
-FVector ABoid::separate()
-{
-	float comfortDist = 10.0f*m_collisionRad;
-	FVector newV;
-	if (m_neighbours.Num() > 0) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("separate"));
-
-		for (int i = 0; i < m_neighbours.Num(); ++i)
-		{
-			float dist = FVector::Dist(m_pos, m_neighbours[i]->m_pos);
-			if (dist < comfortDist)
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("too close"));
-				FVector diffV = (m_pos - m_neighbours[i]->m_pos );
-				diffV /= dist;
-				newV += diffV;
-			}
-		}
-		newV = (newV / m_neighbours.Num());
-		m_vMax = 1.5f*m_vMaxDef;
-		return FVector(newV.X, newV.Y, 0.0f);
-	
-	}
-	m_vMax = 1.0f*m_vMaxDef;
-	return FVector(0.0f);
 }
 
 FVector ABoid::getAverageNeighbourPos(const EBoidType &_t)
@@ -350,37 +302,7 @@ FVector ABoid::getAverageNeighbourPos(const EBoidType &_t)
 	return m_target;
 }
 
-FVector ABoid::alignment()
-{
-	TArray<int> idx;
-	FVector newV = FVector(0.0f);
-	if (idx.Num() < 0)
-	{
-		switch (m_type)
-		{
-		case EBoidType::PREDATOR:
-		{
-			idx = searchPredator();
-			break;
-		}
-		case EBoidType::PREY:
-		{
-			idx = searchPrey();
-			break;
-		}
-		default:
-			break;
-		}
 
-		for (int i = 0; i < idx.Num(); ++i)
-		{
-			newV += m_neighbours[idx[i]]->m_v;
-		}
-		newV /= idx.Num();
-		return newV;
-	}
-	return m_v;
-}
 
 
 

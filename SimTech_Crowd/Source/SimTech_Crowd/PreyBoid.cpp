@@ -14,15 +14,21 @@ APreyBoid::APreyBoid()
 	//UE_LOG(LogTemp, Warning, TEXT("invmass: %f"),m_invMass);
 	m_status = EBoidStatus::WANDERING;
 	m_collisionRad = 1500.0f;
-	m_collisionRadDef = m_collisionRad;
 	m_collision->InitSphereRadius(m_collisionRad);
 	m_isHurt = false;
 	m_numThreat = 0;
 }
 
-APreyBoid* APreyBoid::build(UWorld* _w, APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
+APreyBoid* APreyBoid::build(const float &_m, APreyPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax)
 {
+	if (_m <= 0.0f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid Mass Parameter, returning nullptr"));
+		return nullptr;
+	}
 	APreyBoid* out = NewObject<APreyBoid>();
+	out->m_mass = _m;
+	out->m_invMass = 1.0f / _m;
 	out->m_pos = _pos;
 	out->m_v = _v;
 	out->m_vMax = _vMax;

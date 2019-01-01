@@ -27,27 +27,35 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	/// initiate boids and pack to start the sim
+	/// @brief initialise simulation objects here
 	void initSim();
-
-	UPROPERTY(BlueprintReadWrite)
-	ABoid* m_test;
-
+	/// @brief initialise simulation objects here, callable in blueprint
+	/// @param [in] _prey the prey group to spawn
+	/// @param [in] _pred the predators to spawn
+	UFUNCTION(BlueprintCallable)
+	void initSim(UPARAM(ref) APreyPack* &_prey, UPARAM(ref) APredatorPack* &_pred);
+	/// @brief whether the world should auto generate agents, edit in editor
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere)
+	bool m_auto;
+	///@brief Radius of the simulation world
+	UPROPERTY(EditAnyWhere)
+	float m_worldRad;
+	///@brief The herd of preys in this simulation
 	UPROPERTY(BlueprintReadWrite)
 	APreyPack* m_preys;
-
+	///@brief The predator in this simulation
 	UPROPERTY(BlueprintReadWrite)
 	APredatorPack* m_predators;
-
+	///@brief The bounding sphere
 	UPROPERTY()
 	USphereComponent* m_bound;
 
-	UPROPERTY()
-	float m_worldRad;
-	/// Direct boid back into the test bound
+	/// @brief function delegate to be called when an object collides or leaves the world sphere
+	/// @param [in] _overlappedComponent the component that was collided, not used here
+	/// @param [in] _otherActor the actor that triggered this event
+	/// @param [in] _otherComp the component that triggered this event, not used here
+	/// @param [in] _otherBodyIndex bodyIndex collided with the sphere, not used here
 	UFUNCTION()
 	void onBoidLeavingBound(UPrimitiveComponent* _overlappedComponent, AActor*_otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex);
 };

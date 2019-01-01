@@ -15,12 +15,18 @@ APredatorBoid::APredatorBoid()
 	m_readyToHunt = false;
 	m_collisionRad = 500.0f;
 	m_collision->InitSphereRadius(m_collisionRad);
-	m_collisionRadDef = m_collisionRad;
 }
 
-APredatorBoid* APredatorBoid::build(UWorld* _w, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax, const EHuntRole &_role)
+APredatorBoid* APredatorBoid::build(const float &_m, APredatorPack* _p, const FVector &_pos, const FVector &_v, const float &_vMax, const float &_fMax, const EHuntRole &_role)
 {
+	if(_m <= 0.0f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid Mass Parameter, returning nullptr"));
+		return nullptr;
+	}
 	APredatorBoid* out = NewObject<APredatorBoid>();
+	out->m_mass = _m;
+	out->m_invMass = 1.0f / _m;
 	out->m_pos = _pos;
 	out->m_v = _v;
 	out->m_vMax = _vMax;
@@ -79,7 +85,7 @@ void APredatorBoid::update(const float &_dt)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("TACTICS!"));
 
-		f = tacticalBehaviour(f);
+		f = tacticalBehaviour();
 	}
 
 	resolve(f);
@@ -217,9 +223,9 @@ FVector APredatorBoid::genericBehaviour(const FVector &_f)
 	return f;
 }
 
-FVector APredatorBoid::tacticalBehaviour(const FVector & _f)
+FVector APredatorBoid::tacticalBehaviour()
 {
-	//m_vMax = 3.0f*m_vMaxDef;
+
 	FVector targetP;
 	
 	targetP = m_myPack->m_targetPack->m_packPos;
@@ -237,14 +243,12 @@ FVector APredatorBoid::tacticalBehaviour(const FVector & _f)
 		m_readyToHunt = true;
 
 
-		//UE_LOG(LogTemp, Warning, TEXT("DONE"));
 
 		m_v = (m_myPack->m_targetPack->m_packPos - m_pos) * randRotF;
 		m_target = wander();
 	}
 	else if(!isFar && !m_readyToHunt)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("FORMATION!"));
 
 		performRole(targetP, front);
 	}

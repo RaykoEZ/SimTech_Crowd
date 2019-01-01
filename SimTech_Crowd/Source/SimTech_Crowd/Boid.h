@@ -40,112 +40,135 @@ class SIMTECH_CROWD_API ABoid : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABoid();
-	/// update per tick
+	/// @brief updates the agent every frame
+	/// @param [in] _dt time difference from the previous call
 	virtual void update(const float &_dt);
-	/// determine and change boid status for this boid
+	/// @brief monitors and modifies the states of this agent
 	virtual void handleStatus();
+	/// @brief function called when an agent enters this neighbourhood
 	virtual void onEnterRange();
+	/// @brief steers agent towards a target position
+	/// @return steering force
 	FVector seek() const;
+	/// @brief steers agent away from a target position
+	/// @return steering force
 	FVector flee();
+	/// @brief applies force to the agent and updates position
+	/// @param [in] _force to use
 	void resolve(const FVector &_f);
-	/// implement these:
-	FVector pursue(const FVector &_futureP) const;
-
-	/// Returns random direction to steer forward
+	/// @brief steer the agent to simulate wandering/grazing
+	/// @return random target position to steer towards
 	FVector wander()const; /// d
-
-	FVector turnBack()const; /// d
-	/// Returns direction vector facing away from the average neighbourhood
-	FVector separate(); ///d
-	/// Returns a target vector to steer the boid towards to approach a neighbourhood
+	/// @brief get the average position of the typed agents in the neighbourhood
+	/// @param [in] _t type of agent position to look for
+	/// @return a target vector to steer the boid towards to approach/leave a neighbourhood
 	FVector getAverageNeighbourPos(const EBoidType &_t); ///d
-	FVector alignment(); ///d
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	/// type of boid
+	///@brief type of boid
 	UPROPERTY(BlueprintReadOnly)
 	EBoidType m_type;
-
+	///@brief general behaviour that determines the flocking behaviour of the agent
 	UPROPERTY(BlueprintReadOnly)
 	EBoidStatus m_status;
 
-	/// pointers to boids in fov radius
-	UPROPERTY(BlueprintReadOnly)
-	TArray<ABoid*> m_neighbours;
-
-
-	/// Search for neighbourhood boid types and returns indexes of said types
+	/// @brief Search for neighbourhood boid types
+	/// @return indexes of said types
 	UFUNCTION()
 	TArray<int> searchPrey() const;
+	/// @brief Search for neighbourhood boid types
+	/// @return indexes of said types
 	UFUNCTION()
 	TArray<int> searchPredator()const;
+	///@brief pointers to all agents in the neighbourhood
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ABoid*> m_neighbours;
+	/// @brief getter for predators in the local neighbourhood
+	/// @return pointers to said typed agents
 	UFUNCTION()
 	TArray<ABoid*> getPredator() const;
+	/// @brief getter for preys in the local neighbourhood
+	/// @return pointers to said typed agents
 	UFUNCTION()
 	TArray<ABoid*> getPrey() const;
-
+	/// @brief prints the visuals of the agents
+	/// @param [in] _c colour of the agent
 	void printDebug(const FColor &_c)const;
-	/// when one or more antity enters boid's sphere of detection, 
-	/// delegate functions to bind SphereComponent overlap events
+	/// @brief delegate functions to bind SphereComponent overlap events
+	/// @param [in] _overlappedComponent the component that was collided, not used here
+	/// @param [in] _otherActor the actor that triggered this event
+	/// @param [in] _otherComp the component that triggered this event, not used here
+	/// @param [in] _otherBodyIndex bodyIndex collided with the sphere, not used here
 	UFUNCTION()
 	void onBeginPresenceOverlap(UPrimitiveComponent* _overlappedComponent, AActor* _otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex, bool _fromSweep, const FHitResult & _sweepResult);
+	/// @brief delegate functions to bind SphereComponent overlap events
+	/// @param [in] _overlappedComponent the component that was collided, not used here
+	/// @param [in] _otherActor the actor that triggered this event
+	/// @param [in] _otherComp the component that triggered this event, not used here
+	/// @param [in] _otherBodyIndex bodyIndex collided with the sphere, not used here
 	UFUNCTION()
 	void onEndPresenceOverlap(UPrimitiveComponent* _overlappedComponent, AActor*_otherActor, UPrimitiveComponent* _otherComp, int32 _otherBodyIndex);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/// set and get type of void for builder
+	/// @brief setter for the agent type
+	/// @param [in] _pos the position of the particle
 	void setType(const EBoidType &_t) { m_type = _t; }
+	/// @brief getter for m_type
+	/// @return the type of this agent
 	EBoidType getType() const { return m_type; }
+	/// @brief setter for target position
+	/// @param [in] _pos the position of the particle
 	UFUNCTION()
 	void setTarget(const FVector &_pos) { m_target = _pos; }
-	
+	///@brief whether this agent is out of bound from the meta agent or the eorld sphere
+	UPROPERTY()
+	bool m_isOutOfBound;
+	///@brief type of this agent
 	UPROPERTY()
 	int m_id;
-	/// for a = f/m, 1/m pre-calculated
+	///@brief for a = f/m, 1/m pre-calculated
 	UPROPERTY(BlueprintReadOnly)
 	float m_invMass;
-	/// set mesh for a boid
+	///@brief set mesh for a boid
 	UPROPERTY(EditAnywhere)
-	float m_mass = 10.0f;
+	float m_mass;
 
-	/// max speed scalr
+	/// @brief max speed gain
 	UPROPERTY(EditAnywhere)
 	float m_vMax;
-	/// max speed scalr default
+	///@brief max speed gain default
 	UPROPERTY()
 	float m_vMaxDef;
-	/// max force
+	///@brief max force gain
 	UPROPERTY(EditAnywhere)
 	float m_fMax;
-	
-	/// position of boid
+	///@brief radius for the neighbourhood
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float m_collisionRad;
+	///@brief position of boid
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_pos;
 	
-	/// current velocity
+	///@brief current velocity
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_v;
-	/// target position to move to/focus on
+	///@brief target position to move to/focus on
 	UPROPERTY(BlueprintReadWrite)
 	FVector m_target;
 
-	/// Mesh for a boid
+	///@brief Mesh for a boid
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStaticMeshComponent* m_mesh;
 
-
+	///@brief bounding sphere for local neighbourhood
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USphereComponent* m_collision;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float m_collisionRad;
-	float m_collisionRadDef;
-	UPROPERTY()
-	bool m_isOutOfBound;
 
+	///@brief seeded pseudo random number generator for initialisation
 	FRandomStream m_rng;
 };
