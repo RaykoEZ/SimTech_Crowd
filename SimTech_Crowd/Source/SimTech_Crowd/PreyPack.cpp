@@ -9,8 +9,8 @@ APreyPack::APreyPack()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	m_spawnCentre = FVector(4000.0f,0.0f,0.0f);
-	m_numMember = 20;
-	m_spawnRad = (float)m_numMember * 500.0f;
+	m_numMember = 70;
+	m_spawnRad = 10000.0f;
 	m_packState = EHerdStatus::NERVOUS;
 	m_packPos = m_spawnCentre;
 	/// setup boundary

@@ -60,6 +60,7 @@ void APreyBoid::update(const float &_dt)
 	//printDebug();
 	handleStatus();
 	onEnterRange();
+	/// if prey is hurt, decrease forve influence
 	if(m_isHurt && _dt > 45.0f)
 	{
 		FVector f0 = genericBehaviour(f);
