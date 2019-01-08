@@ -50,7 +50,7 @@ void APredatorPack::init()
 		/// Spawning a boid
 
 		/// Get a boid initialized
-		APredatorBoid* predator = APredatorBoid::build(10.0f, this, pos, v, FMath::FRandRange(2.5f, 3.0f), 1.0f, role);
+		APredatorBoid* predator = APredatorBoid::build(10.0f, this, pos, v, FMath::FRandRange(3.5f, 5.0f), 1.0f, role);
 		predator->m_id = (int)i;
 
 		/// Set this boid as a template for spawning

@@ -55,7 +55,7 @@ void APreyPack::init()
 		//UE_LOG(LogTemp, Warning, TEXT("pos gen : (%f , %f, %f)"), pos.X, pos.Y, pos.Z);
 		/// Spawning a boid
 		/// Get a boid initialized
-		APreyBoid* prey = APreyBoid::build(10.0f, this,pos, v,FMath::FRandRange(2.4f,3.5f), 1.0f);	
+		APreyBoid* prey = APreyBoid::build(10.0f, this,pos, v,FMath::FRandRange(4.5f,6.5f), 1.0f);	
 		/// Set this boid as a template for spawning
 		FActorSpawnParameters param = FActorSpawnParameters();
 		param.Template = Cast<AActor>(prey);
