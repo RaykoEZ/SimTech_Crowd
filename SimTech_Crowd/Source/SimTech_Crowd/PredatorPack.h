@@ -28,7 +28,7 @@ public:
 	// Sets default values for this actor's properties
 	APredatorPack();
 	///@brief number of agents in this group at the start
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int m_numMember;
 	///@brief  Meta-state of the agents, affects flocking behaviour
 	UPROPERTY()
