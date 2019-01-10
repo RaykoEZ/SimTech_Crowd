@@ -34,4 +34,5 @@ ___
 ### Building the source
 ___
 - You can choose to click Compile in the UE4 editor
-- Or right-click+click Build on the SimTech_Crowd project root in the class/directory outliner in Visual Studio. 
+- Or right-click+click Build on the SimTech_Crowd project root in the class/directory outliner in Visual Studio.
+- To access Visual Studio project before a .sln file is in the project root directory, either choose "Generate Visual Studio Project" from the Engine Editor's File tab, or in File Explorer, right-click the .uproject file and choose to "generate Visual Studio Project files".
