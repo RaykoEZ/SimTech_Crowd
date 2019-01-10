@@ -14,7 +14,7 @@ ___
 To start a session, click play in the Unreal Engine editor.
 
 Basic parameters of the smulation (such as number of agents, their velocity and force gain limits)
-Most of the internal properties are editable in source.
+Most of the internal properties are editable in source and Engine's Property Editor by selecting MySimWorld, MyPreyPack or MyPredatorPack in the World Outliner.
 
 ### To generate your own agent groups: 
 ___
